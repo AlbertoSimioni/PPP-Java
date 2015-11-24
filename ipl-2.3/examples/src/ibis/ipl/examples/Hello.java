@@ -20,8 +20,8 @@ import java.io.IOException;
 
 public class Hello {
 
-    PortType portType = new PortType(PortType.COMMUNICATION_RELIABLE,
-            PortType.SERIALIZATION_DATA, PortType.RECEIVE_EXPLICIT,
+    PortType portType = new PortType(PortType.COMMUNICATION_RELIABLE, //reliable communications and election
+            PortType.SERIALIZATION_DATA, PortType.RECEIVE_EXPLICIT,  //one_to_one, string can be sent
             PortType.CONNECTION_ONE_TO_ONE);
 
     IbisCapabilities ibisCapabilities = new IbisCapabilities(
@@ -30,11 +30,11 @@ public class Hello {
     private void server(Ibis myIbis) throws IOException {
 
         // Create a receive port and enable connections.
-        ReceivePort receiver = myIbis.createReceivePort(portType, "server");
+        ReceivePort receiver = myIbis.createReceivePort(portType, "server"); //using the variable porttype
         receiver.enableConnections();
 
         // Read the message.
-        ReadMessage r = receiver.receive();
+        ReadMessage r = receiver.receive(); //explicit receive as asked in the the port type
         String s = r.readString();
         r.finish();
         System.out.println("Server received: " + s);
@@ -46,8 +46,8 @@ public class Hello {
     private void client(Ibis myIbis, IbisIdentifier server) throws IOException {
 
         // Create a send port for sending requests and connect.
-        SendPort sender = myIbis.createSendPort(portType);
-        sender.connect(server, "server");
+        SendPort sender = myIbis.createSendPort(portType); //same type of the receiver port
+        sender.connect(server, "server"); //connects the port to the sender
 
         // Send the message.
         WriteMessage w = sender.newMessage();
@@ -63,8 +63,8 @@ public class Hello {
         Ibis ibis = IbisFactory.createIbis(ibisCapabilities, null, portType);
 
         // Elect a server
-        IbisIdentifier server = ibis.registry().elect("Server");
-
+        IbisIdentifier server = ibis.registry().elect("Server"); // decide if the current ibis is a server
+        														 // or a client
         System.out.println("Server is " + server);
 
         // If I am the server, run server, else run client.

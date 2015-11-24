@@ -24,7 +24,7 @@ public class Cube implements Serializable {
         X, Y, Z
     }
 
-    // indexes for sides of the cube
+    // indexes for sides of the cube - facce
 
     public static final int TOP = 0;
 
@@ -38,9 +38,9 @@ public class Cube implements Serializable {
 
     public static final int BOTTOM = 5;
 
-    public static final int SIDES = 6; // # sizes of a cube
+    public static final int SIDES = 6; // # sizes of a cube 
 
-    // colors of elements
+    // colors of elements  - byte occupies just 1 byte instead of 4 occupied by an int
 
     public static final byte WHITE = 0; // value for white element
 
@@ -56,6 +56,8 @@ public class Cube implements Serializable {
 
     private int size; // size of this cube
 
+    //Sides and colors have the same constant cardinality = 6 
+    
     /*
      * content of the cube. Data format is an array of sides, with all the
      * elements of each side as an array of bytes.
@@ -64,7 +66,7 @@ public class Cube implements Serializable {
      * 
      * W BOGR Y
      */
-    private final byte[][] data;
+    private final byte[][] data; // first dimension = SIDES - second dimension = size * size
 
     private int twists; // number of twists this cube is a result of
 
@@ -86,9 +88,9 @@ public class Cube implements Serializable {
         bound = 0;
 
         // init state. side 0 should be white, side 1 is yellow, etc.
-        for (byte side = 0; side < SIDES; side++) {
-            for (int element = 0; element < size * size; element++) {
-                data[side][element] = side;
+        for (byte side = 0; side < SIDES; side++) { //iterates all the sides
+            for (int element = 0; element < size * size; element++) { // iterates all the elements
+                data[side][element] = side; //variable side used also to assign the color
             }
         }
     }
@@ -105,15 +107,15 @@ public class Cube implements Serializable {
      *            seed will make the cube generator deterministic.
      */
     public Cube(int size, int twists, long seed) {
-        this(size);
-
+        this(size); //calling the constructor with one parameter
+        			//now we have a ordered cube
         Random random = new Random(seed);
 
         // do some random twists
         for (int i = 0; i < twists; i++) {
-            int axis = random.nextInt(3);
-            // select a row ( 0 < row < size )
-            int row = random.nextInt(size - 1) + 1;
+            int axis = random.nextInt(3); //random number between 0 and 2 (both inclusive)
+            // random number row ( 0 < row < size )
+            int row = random.nextInt(size - 1) + 1; 
             boolean direction = random.nextBoolean();
 
             switch (axis) {
@@ -126,6 +128,7 @@ public class Cube implements Serializable {
             case 2:
                 twistZ(row, direction);
                 break;
+                
             }
         }
 
@@ -159,7 +162,8 @@ public class Cube implements Serializable {
         }
 
     }
-
+    
+    //constructor from input file
     public Cube(String fileName) throws Exception {
         File file = new File(fileName);
         if (!file.exists()) {
@@ -169,10 +173,10 @@ public class Cube implements Serializable {
         BufferedReader reader = null;
         try {
             reader = new BufferedReader(new FileReader(fileName));
-            String sizeString = reader.readLine();
+            String sizeString = reader.readLine(); //reading the size as string
 
             try {
-                this.size = Integer.parseInt(sizeString);
+                this.size = Integer.parseInt(sizeString);  //trying to convert the stize to integer
             } catch (NumberFormatException e) {
                 throw new Exception(
                         "expected size at first line of file, got: "
@@ -182,25 +186,25 @@ public class Cube implements Serializable {
             // init data arrays
             data = new byte[SIDES][size * size];
 
-            for (int i = 0; i < SIDES; i++) {
-                for (int x = 0; x < size; x++) {
-                    String line = reader.readLine();
+            for (int i = 0; i < SIDES; i++) { //iterating the sides
+                for (int x = 0; x < size; x++) { //iterating the rows
+                    String line = reader.readLine(); //one line of the file contains one row
 
-                    if (line.length() != size) {
+                    if (line.length() != size) { //check
                         throw new Exception("Expected line of size " + size
                                 + ", got " + line);
                     }
 
                     for (int y = 0; y < size; y++) {
                         byte color = parseElement(line.charAt(y));
-                        int elementIndex = element(x, y);
-
+                        int elementIndex = element(x, y); //element index for the second dimension
+                        								  //side relative
                         data[i][elementIndex] = color;
                     }
 
                 }
             }
-        } finally {
+        } finally { //code executed both in case of exception and in case of normal execution
             if(reader != null) {
                 reader.close();
             }
@@ -219,8 +223,8 @@ public class Cube implements Serializable {
         target.bound = bound;
 
         // init state.
-        for (byte i = 0; i < SIDES; i++) {
-            System.arraycopy(data[i], 0, target.data[i], 0, data[i].length);
+        for (byte i = 0; i < SIDES; i++) { 
+            System.arraycopy(data[i], 0, target.data[i], 0, data[i].length); //one dimensional copy
         }
     }
 
