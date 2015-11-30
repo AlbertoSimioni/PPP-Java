@@ -238,8 +238,7 @@ public class Rubiks {
         // NOTE: this is printed to standard error! The rest of the output is
         // constant for each set of parameters. Printing this to standard error
         // makes the output of standard out comparable with "diff"
-        System.err.println("Solving cube took " + (end - start)
-                + " milliseconds");
+        //System.err.println("Solving cube took " + (end - start) + " milliseconds");
 
     	
     	ibis.end();
