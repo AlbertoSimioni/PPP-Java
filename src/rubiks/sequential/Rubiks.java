@@ -21,7 +21,7 @@ public class Rubiks {
      * @return the number of solutions found
      */
     private static int solutions(Cube cube, CubeCache cache) {
-        if (cube.isSolved()) {
+        if (cube.isSolved()) { //***
             return 1;
         }
 
@@ -31,7 +31,7 @@ public class Rubiks {
 
         // generate all possible cubes from this one by twisting it in
         // every possible way. Gets new objects from the cache
-        Cube[] children = cube.generateChildren(cache);
+        Cube[] children = cube.generateChildren(cache); //****
 
         int result = 0;
 
@@ -67,13 +67,15 @@ public class Rubiks {
         int result = 0;
 
         System.out.print("Bound now:");
-
+        
+        //the algorithms stops when at least one solution is found 
         while (result == 0) {
             bound++;
             cube.setBound(bound);
 
             System.out.print(" " + bound);
-            result = solutions(cube, cache);
+            result = solutions(cube, cache); //solutions returns the number of solutions found with the 
+            								 //current number of steps
         }
 
         System.out.println();
