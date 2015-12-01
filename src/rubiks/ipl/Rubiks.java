@@ -21,11 +21,11 @@ import ibis.ipl.WriteMessage;
 public class Rubiks {
 	
 
-    PortType portType = new PortType(PortType.COMMUNICATION_RELIABLE, //reliable communications and election
+    static PortType portType = new PortType(PortType.COMMUNICATION_RELIABLE, //reliable communications and election
             PortType.SERIALIZATION_DATA, PortType.RECEIVE_EXPLICIT,  //one_to_one, string can be sent
             PortType.CONNECTION_ONE_TO_ONE);
 
-    IbisCapabilities ibisCapabilities = new IbisCapabilities(
+    static IbisCapabilities ibisCapabilities = new IbisCapabilities(
             IbisCapabilities.ELECTIONS_STRICT,
             IbisCapabilities.MEMBERSHIP_TOTALLY_ORDERED,
             IbisCapabilities.TERMINATION);
@@ -280,7 +280,7 @@ public class Rubiks {
     
     
     private void run(String[] arguments) throws Exception {
-    	myIbis = IbisFactory.createIbis(ibisCapabilities, null);
+    	myIbis = IbisFactory.createIbis(ibisCapabilities, null, portType);
     	
     	initialize();
     	
