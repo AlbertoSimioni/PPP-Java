@@ -21,14 +21,15 @@ import ibis.ipl.WriteMessage;
 public class Rubiks {
 	
 
-    static PortType portType = new PortType(PortType.COMMUNICATION_RELIABLE, //reliable communications and election
+     PortType portType = new PortType(PortType.COMMUNICATION_RELIABLE, //reliable communications and election
             PortType.SERIALIZATION_DATA, PortType.RECEIVE_EXPLICIT,  //one_to_one, string can be sent
             PortType.CONNECTION_ONE_TO_ONE);
 
-    static IbisCapabilities ibisCapabilities = new IbisCapabilities(
-            IbisCapabilities.ELECTIONS_STRICT,
-            IbisCapabilities.MEMBERSHIP_TOTALLY_ORDERED,
-            IbisCapabilities.TERMINATION);
+     IbisCapabilities ibisCapabilities = new IbisCapabilities(
+            //IbisCapabilities.ELECTIONS_STRICT,
+            IbisCapabilities.MEMBERSHIP_TOTALLY_ORDERED
+            //,IbisCapabilities.TERMINATION
+            );
     
     /**
      * Identifiers of the nodes that are active inside the current execution
@@ -168,9 +169,10 @@ public class Rubiks {
         System.out.println("NUMBER OF JOINED NODES:" + ibisesNodes.length);
         
         // Elect a server
+        /*
         server = myIbis.registry().elect("Server"); // decide if the current ibis is a server
         														 // or a client
-        System.out.println("Server is " + server);    
+        System.out.println("Server is " + server); */   
     }
 
     
@@ -280,10 +282,10 @@ public class Rubiks {
     
     
     private void run(String[] arguments) throws Exception {
-    	myIbis = IbisFactory.createIbis(ibisCapabilities, null, portType);
+    	myIbis = IbisFactory.createIbis(ibisCapabilities, null);
     	
     	initialize();
-    	
+    	/*
     	if (server.equals(myIbis.identifier())) {
     		//code 
     		createStartCube(arguments);
@@ -291,7 +293,7 @@ public class Rubiks {
         } else {
         	//GET CUBE FROM SERVER
             //client(ibis, server);
-        }
+        }*/
     	
     	/**
         // solve
