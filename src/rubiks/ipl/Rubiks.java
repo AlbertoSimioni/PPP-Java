@@ -1,10 +1,16 @@
 package rubiks.ipl;
 
+import java.io.IOException;
+
 import ibis.ipl.Ibis;
 import ibis.ipl.IbisCapabilities;
 import ibis.ipl.IbisFactory;
 import ibis.ipl.IbisIdentifier;
 import ibis.ipl.PortType;
+import ibis.ipl.ReadMessage;
+import ibis.ipl.ReceivePort;
+import ibis.ipl.SendPort;
+import ibis.ipl.WriteMessage;
 
 /**
  * Solver for rubik's cube puzzle.
@@ -20,7 +26,9 @@ public class Rubiks {
             PortType.CONNECTION_ONE_TO_ONE);
 
     IbisCapabilities ibisCapabilities = new IbisCapabilities(
-            IbisCapabilities.ELECTIONS_STRICT);
+            IbisCapabilities.ELECTIONS_STRICT,
+            IbisCapabilities.MEMBERSHIP_TOTALLY_ORDERED,
+            IbisCapabilities.TERMINATION);
     
     /**
      * Identifiers of the nodes that are active inside the current execution
@@ -35,7 +43,7 @@ public class Rubiks {
     /**
      * Ibis object
      */
-    private Ibis ibis = null;
+    private Ibis myIbis = null;
     
     /**
      * Starting cube
@@ -81,7 +89,6 @@ public class Rubiks {
             // put child object in cache
             cache.put(child);
         }
-
         return result;
     }
 
@@ -141,7 +148,14 @@ public class Rubiks {
         System.out.println("");
     }
 
-    private void initialize(String[] arguments) throws Exception {
+    
+    /**
+     * Function that retrieve the identifiers of all the nodes inside the system and 
+     * get the identifier of the server node.
+     * 
+     * @throws Exception if something goes wrong due to connection problem
+     */
+    private void initialize() throws Exception {
         // Create an ibis instance.
         
 
@@ -149,17 +163,22 @@ public class Rubiks {
         Thread.sleep(1000);
         
         
-        ibisesNodes = ibis.registry().joinedIbises();
+        ibisesNodes = myIbis.registry().joinedIbises();
         
         System.out.println("NUMBER OF JOINED NODES:" + ibisesNodes.length);
         
         // Elect a server
-        server = ibis.registry().elect("Server"); // decide if the current ibis is a server
+        server = myIbis.registry().elect("Server"); // decide if the current ibis is a server
         														 // or a client
         System.out.println("Server is " + server);    
     }
+
     
-        
+    /**
+     * Creates the initial cube
+     * 
+     * @param arguments given by the user at the start of the program
+     */
     private void createStartCube(String[] arguments){
     	//3)SERVER CREATE THE CUBE
     	
@@ -217,10 +236,56 @@ public class Rubiks {
         
     }
     
+    /**
+     * Starts the work that has to be performed by a server node
+     * @throws IOException Thrown if there are any problem inside the network
+     */
+    private void server() throws IOException {
+
+        // Create a receive port and enable connections.
+        ReceivePort receiver = myIbis.createReceivePort(portType, "server"); //using the variable porttype
+        receiver.enableConnections();
+
+        // Read the message.
+        ReadMessage r = receiver.receive(); //explicit receive as asked in the the port type
+        String s = r.readString();
+        r.finish();
+        System.out.println("Server received: " + s);
+
+        // Close receive port.
+        receiver.close();
+    }
+
+    /**
+     * Starts the work that has to be performed by a client node
+     * 
+     * @param server Identifier of the server node 
+     * @throws IOException Thrown if there are any problem inside the network
+     */
+    private void client(IbisIdentifier server) throws IOException {
+
+        // Create a send port for sending requests and connect.
+        SendPort sender = myIbis.createSendPort(portType); //same type of the receiver port
+        sender.connect(server, "server"); //connects the port to the sender
+
+        // Send the message.
+        WriteMessage w = sender.newMessage();
+        w.writeString("Hi there");
+        w.finish();
+
+        // Close ports.
+        sender.close();
+    }
+    
+    
+    
     private void run(String[] arguments) throws Exception {
-    	ibis = IbisFactory.createIbis(ibisCapabilities, null, portType);
-    	initialize(arguments);
-    	if (server.equals(ibis.identifier())) {
+    	myIbis = IbisFactory.createIbis(ibisCapabilities, null, portType);
+    	
+    	initialize();
+    	
+    	if (server.equals(myIbis.identifier())) {
+    		//code 
     		createStartCube(arguments);
             //server(ibis);
         } else {
@@ -241,20 +306,18 @@ public class Rubiks {
         //System.err.println("Solving cube took " + (end - start) + " milliseconds");
 
     	
-    	ibis.end();
+    	myIbis.end();
     }
     
     
     /**
-     * Main function.
+     * Main function, it starts creates a new object of the class that uses ibis to resolve
+     * the Rubik's cube
      * 
      * @param arguments
      *            list of arguments
      */
     public static void main(String[] arguments) {
-        
-    	
-    	//1)LET'S WAIT FOR EVERYBODY - BY SETTING A SLEEP OF 1 SECOND (MEABY IT'S NOT NEEDED)
     	   try {
                new Rubiks().run(arguments);
            } catch (Exception e) {
