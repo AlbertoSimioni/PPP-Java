@@ -155,7 +155,7 @@ public class Rubiks {
      */
     private void initialize() throws Exception {
         // Create an ibis instance.
-       
+        
 
         // sleep for a second
         //Thread.sleep(1000);
