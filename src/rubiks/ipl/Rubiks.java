@@ -26,10 +26,7 @@ public class Rubiks {
             PortType.CONNECTION_ONE_TO_ONE);
 
      IbisCapabilities ibisCapabilities = new IbisCapabilities(
-            //IbisCapabilities.ELECTIONS_STRICT,
-            //IbisCapabilities.MEMBERSHIP_TOTALLY_ORDERED
-            //,IbisCapabilities.TERMINATION
-            );
+             IbisCapabilities.MEMBERSHIP_TOTALLY_ORDERED);
     
     /**
      * Identifiers of the nodes that are active inside the current execution 
@@ -282,9 +279,11 @@ public class Rubiks {
     
     
     private void run(String[] arguments) throws Exception {
-    	myIbis = IbisFactory.createIbis(ibisCapabilities, null);
-    	
-    	initialize();
+    	//myIbis = IbisFactory.createIbis(ibisCapabilities, null);
+    	Ibis ibis = IbisFactory.createIbis(ibisCapabilities, null);
+    	IbisIdentifier[] joinedIbises = ibis.registry().joinedIbises();
+    	System.out.println("NUMBER OF JOINED NODES:" + joinedIbises.length);
+    	//initialize();
     	/*
     	if (server.equals(myIbis.identifier())) {
     		//code 
