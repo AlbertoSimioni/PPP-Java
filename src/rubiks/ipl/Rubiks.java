@@ -32,7 +32,7 @@ public class Rubiks {
             );
     
     /**
-     * Identifiers of the nodes that are active inside the current execution
+     * Identifiers of the nodes that are active inside the current execution 
      */
     private IbisIdentifier[] ibisesNodes = null;
     
