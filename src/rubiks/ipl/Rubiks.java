@@ -160,7 +160,7 @@ public class Rubiks {
        
 
         // sleep for a second
-        Thread.sleep(1000);
+        //Thread.sleep(1000);
         
         
         ibisesNodes = myIbis.registry().joinedIbises();
@@ -280,7 +280,7 @@ public class Rubiks {
     
     
     private void run(String[] arguments) throws Exception {
-    	myIbis = IbisFactory.createIbis(ibisCapabilities, null, portType);
+    	myIbis = IbisFactory.createIbis(ibisCapabilities, null);
     	
     	initialize();
     	
