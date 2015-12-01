@@ -27,7 +27,7 @@ public class Rubiks {
 
      IbisCapabilities ibisCapabilities = new IbisCapabilities(
             //IbisCapabilities.ELECTIONS_STRICT,
-            IbisCapabilities.MEMBERSHIP_TOTALLY_ORDERED
+            //IbisCapabilities.MEMBERSHIP_TOTALLY_ORDERED
             //,IbisCapabilities.TERMINATION
             );
     
