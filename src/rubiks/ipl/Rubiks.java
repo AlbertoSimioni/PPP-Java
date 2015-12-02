@@ -167,7 +167,6 @@ public class Rubiks {
         
         System.out.println("NUMBER OF JOINED NODES:" + ibisesNodes.length);
         for(IbisIdentifier ibisids : ibisesNodes){
-        	System.out.println("PORCODIO");
         	System.out.println(ibisids.name()); 
         }
         
