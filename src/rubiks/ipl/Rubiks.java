@@ -166,6 +166,9 @@ public class Rubiks {
         ibisesNodes = myIbis.registry().joinedIbises();
         
         System.out.println("NUMBER OF JOINED NODES:" + ibisesNodes.length);
+        for(IbisIdentifier ibisids : ibisesNodes){
+        	System.out.println(ibisids.name() + "\n");
+        }
         
         // Elect a server
         server = myIbis.registry().elect("Server"); // decide if the current ibis is a server
