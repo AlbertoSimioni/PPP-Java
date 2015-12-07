@@ -1,16 +1,11 @@
 package rubiks.ipl;
 
-import java.io.IOException;
-
 import ibis.ipl.Ibis;
 import ibis.ipl.IbisCapabilities;
 import ibis.ipl.IbisFactory;
 import ibis.ipl.IbisIdentifier;
 import ibis.ipl.PortType;
-import ibis.ipl.ReadMessage;
-import ibis.ipl.ReceivePort;
-import ibis.ipl.SendPort;
-import ibis.ipl.WriteMessage;
+
 
 /**
  * Solver for rubik's cube puzzle.
@@ -21,35 +16,33 @@ import ibis.ipl.WriteMessage;
 public class Rubiks {
 	
 
-    PortType portType = new PortType(PortType.COMMUNICATION_RELIABLE, //reliable communications and election
-            PortType.SERIALIZATION_DATA, PortType.RECEIVE_EXPLICIT,  //one_to_one, string can be sent
-            PortType.CONNECTION_ONE_TO_ONE);
+    static PortType portOneToMany = new PortType(PortType.COMMUNICATION_RELIABLE, //reliable communications and election
+            PortType.SERIALIZATION_OBJECT, PortType.RECEIVE_EXPLICIT,  //one_to_one, string can be sent
+            PortType.CONNECTION_ONE_TO_MANY);
+    
+    static PortType portManyToOne = new PortType(PortType.COMMUNICATION_RELIABLE, //reliable communications and election
+            PortType.SERIALIZATION_OBJECT, PortType.RECEIVE_EXPLICIT,  //one_to_one, string can be sent
+            PortType.CONNECTION_MANY_TO_ONE);
 
-    IbisCapabilities ibisCapabilities = new IbisCapabilities(
+    static IbisCapabilities ibisCapabilities = new IbisCapabilities(
             IbisCapabilities.ELECTIONS_STRICT,
             IbisCapabilities.MEMBERSHIP_TOTALLY_ORDERED,
             IbisCapabilities.TERMINATION);
     
-    /**
-     * Identifiers of the nodes that are active inside the current execution
-     */
-    private IbisIdentifier[] ibisesNodes = null;
-    
+
     /**
      * Identifier of the server node
      */
-    private IbisIdentifier server = null;
+    public IbisIdentifier server = null;
     
-    /**
-     * Ibis object
-     */
-    private Ibis myIbis = null;
+    static String READY_FOR_NEW_JOBS = "r";
     
-    /**
-     * Starting cube
-     */
-    private Cube startCube = null;
+    static String PAUSE_WORKER_COMPUTATION = "p";
     
+    static String FINALIZE_MESSAGE = "f";
+    
+	public Ibis myIbis = null;
+	
     public static final boolean PRINT_SOLUTION = false;
 
     /**
@@ -62,7 +55,7 @@ public class Rubiks {
      *            cache of cubes used for new cube objects
      * @return the number of solutions found
      */
-    private static int solutions(Cube cube, CubeCache cache) {
+    public static int solutions(Cube cube, CubeCache cache) {
         if (cube.isSolved()) { //***
             return 1;
         }
@@ -92,37 +85,6 @@ public class Rubiks {
         return result;
     }
 
-    /**
-     * Solves a Rubik's cube by iteratively searching for solutions with a
-     * greater depth. This guarantees the optimal solution is found. Repeats all
-     * work for the previous iteration each iteration though...
-     * 
-     * @param cube
-     *            the cube to solve
-     */
-    private static void solve(Cube cube) {
-        // cache used for cube objects. Doing new Cube() for every move
-        // overloads the garbage collector
-        CubeCache cache = new CubeCache(cube.getSize());
-        int bound = 0;
-        int result = 0;
-
-        System.out.print("Bound now:");
-        
-        //the algorithms stops when at least one solution is found 
-        while (result == 0) {
-            bound++;
-            cube.setBound(bound);
-
-            System.out.print(" " + bound);
-            result = solutions(cube, cache); //solutions returns the number of solutions found with the 
-            								 //current number of steps
-        }
-
-        System.out.println();
-        System.out.println("Solving cube possible in " + result + " ways of "
-                + bound + " steps");
-    }
 
     public static void printUsage() {
         System.out.println("Rubiks Cube solver");
@@ -148,6 +110,7 @@ public class Rubiks {
         System.out.println("");
     }
 
+
     
     /**
      * Function that retrieve the identifiers of all the nodes inside the system and 
@@ -156,144 +119,33 @@ public class Rubiks {
      * @throws Exception if something goes wrong due to connection problem
      */
     private void initialize() throws Exception {
-        // Create an ibis instance.
-        
-
+    	myIbis = IbisFactory.createIbis(ibisCapabilities, null,portOneToMany,portManyToOne);
         // sleep for a second
-        Thread.sleep(1000);
+        Thread.sleep(500);
         
-        
-        ibisesNodes = myIbis.registry().joinedIbises();
-        
-        System.out.println("NUMBER OF JOINED NODES:" + ibisesNodes.length);
-        for(IbisIdentifier ibisids : ibisesNodes){
+        /*
+        System.out.println("NUMBER OF JOINED NODES:" + ibisNodes.length);
+        for(IbisIdentifier ibisids : ibisNodes){
         	System.out.println(ibisids.name()); 
-        }
+        }*/
         
         // Elect a server
-        server = myIbis.registry().elect("Server"); // decide if the current ibis is a server
-        														 // or a client
-        System.out.println("Server is " + server);    
-    }
+        server = myIbis.registry().elect("Server");
 
-    
-    /**
-     * Creates the initial cube
-     * 
-     * @param arguments given by the user at the start of the program
-     */
-    private void createStartCube(String[] arguments){
-    	//3)SERVER CREATE THE CUBE
-    	
-
-        // default parameters of puzzle
-        int size = 3;
-        int twists = 11;
-        int seed = 0;
-        String fileName = null;
-
-        // number of threads used to solve puzzle
-        // (not used in sequential version)
-
-        for (int i = 0; i < arguments.length; i++) {
-            if (arguments[i].equalsIgnoreCase("--size")) {
-                i++;
-                size = Integer.parseInt(arguments[i]);
-            } else if (arguments[i].equalsIgnoreCase("--twists")) {
-                i++;
-                twists = Integer.parseInt(arguments[i]);
-            } else if (arguments[i].equalsIgnoreCase("--seed")) {
-                i++;
-                seed = Integer.parseInt(arguments[i]);
-            } else if (arguments[i].equalsIgnoreCase("--file")) {
-                i++;
-                fileName = arguments[i];
-            } else if (arguments[i].equalsIgnoreCase("--help") || arguments[i].equalsIgnoreCase("-h")) {
-                printUsage();
-                System.exit(0);
-            } else {
-                System.err.println("unknown option : " + arguments[i]);
-                printUsage();
-                System.exit(1);
-            }
-        }
-
-        // create cube
-        if (fileName == null) {
-            startCube = new Cube(size, twists, seed);
-        } else {
-            try {
-                startCube = new Cube(fileName);
-            } catch (Exception e) {
-                System.err.println("Cannot load cube from file: " + e);
-                System.exit(1);
-            }
-        }
-        
-        // print cube info
-        System.out.println("Searching for solution for cube of size "
-                + startCube.getSize() + ", twists = " + twists + ", seed = " + seed);
-        startCube.print(System.out);
-        System.out.flush();
-
-        
+       // System.out.println("Server is " + server);    
     }
     
-    /**
-     * Starts the work that has to be performed by a server node
-     * @throws IOException Thrown if there are any problem inside the network
-     */
-    private void server() throws IOException {
-
-        // Create a receive port and enable connections.
-        ReceivePort receiver = myIbis.createReceivePort(portType, "server"); //using the variable porttype
-        receiver.enableConnections();
-
-        // Read the message.
-        ReadMessage r = receiver.receive(); //explicit receive as asked in the the port type
-        String s = r.readString();
-        r.finish();
-        System.out.println("Server received: " + s);
-
-        // Close receive port.
-        receiver.close();
-    }
-
-    /**
-     * Starts the work that has to be performed by a client node
-     * 
-     * @param server Identifier of the server node 
-     * @throws IOException Thrown if there are any problem inside the network
-     */
-    private void client(IbisIdentifier server) throws IOException {
-
-        // Create a send port for sending requests and connect.
-        SendPort sender = myIbis.createSendPort(portType); //same type of the receiver port
-        sender.connect(server, "server"); //connects the port to the sender
-
-        // Send the message.
-        WriteMessage w = sender.newMessage();
-        w.writeString("Hi there");
-        w.finish();
-
-        // Close ports.
-        sender.close();
-    }
-    
-    
-    
-    private void run(String[] arguments) throws Exception {
-    	myIbis = IbisFactory.createIbis(ibisCapabilities, null, portType);
-    	
+    private void run(String[] arguments) throws Exception { 
+    	int size = 3;
+    	if ( arguments.length > 0 && arguments[0].equalsIgnoreCase("--size")) {
+            size = Integer.parseInt(arguments[0]);
+    	}
     	initialize();
     	
     	if (server.equals(myIbis.identifier())) {
-    		//code 
-    		createStartCube(arguments);
-            //server(ibis);
+    		new Server(arguments,this);
         } else {
-        	//GET CUBE FROM SERVER
-            //client(ibis, server);
+            new Worker(size,this).workerComputation();
         }
     	
     	/**
@@ -306,9 +158,7 @@ public class Rubiks {
         // NOTE: this is printed to standard error! The rest of the output is
         // constant for each set of parameters. Printing this to standard error
         // makes the output of standard out comparable with "diff"
-        //System.err.println("Solving cube took " + (end - start) + " milliseconds");
-
-    	
+        //System.err.println("Solving cube took " + (end - start) + " milliseconds")
     	myIbis.end();
     }
     
@@ -326,8 +176,6 @@ public class Rubiks {
            } catch (Exception e) {
                e.printStackTrace(System.err);
            }
-
-
     }
 
 }

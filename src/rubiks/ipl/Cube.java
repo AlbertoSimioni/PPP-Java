@@ -11,6 +11,7 @@ import java.util.Random;
  * @author Niels Drost
  * 
  *         A rubik's cube.
+ *         the Fields of a cube are: the data about the colors, the size, the bound, the twists
  * 
  */
 public class Cube implements Serializable {
