@@ -39,7 +39,6 @@ public class Server {
         	if(cube.getTwists() == 3){
         		ReadMessage r = serverReceivePort.receive(); 
                 String s = r.readString();
-                IbisIdentifier workerId = r.origin().ibisIdentifier();
                 r.finish();
                 if(s.equals(Rubiks.READY_FOR_NEW_JOBS)){
                 	WriteMessage w = serverSendPort.newMessage();
@@ -57,7 +56,7 @@ public class Server {
         int bound = 0;
         int result = 0;
         for(IbisIdentifier ibis: rubiks.ibisNodes){
-        	if(!ibis.name().equals(rubiks.myIbis.identifier()))
+        	if(!(ibis.name().equals(rubiks.myIbis.identifier())))
         		serverSendPort.connect(ibis, "receive port");
         }
     	while (result == 0) {
