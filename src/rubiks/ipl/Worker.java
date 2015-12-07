@@ -10,10 +10,6 @@ import ibis.ipl.WriteMessage;
 
 public class Worker {
 
-	/**
-	 * Identifier of the server node
-	 */
-	private IbisIdentifier server = null;
 
 	private SendPort workerSendPort = null;
 
@@ -28,7 +24,7 @@ public class Worker {
 		int solutionsFinded = 0;
 		while (!end) {
 			// asking for a new job
-			workerSendPort.connect(server, "receive port");
+			workerSendPort.connect(rubiks.server, "receive port");
 			WriteMessage w = workerSendPort.newMessage();
 			w.writeString(Rubiks.READY_FOR_NEW_JOBS);
 			w.finish();
@@ -57,7 +53,7 @@ public class Worker {
 	}
 
 	private void sendResultToServer(int value) throws Exception {
-		workerSendPort.connect(server, "receive port");
+		workerSendPort.connect(rubiks.server, "receive port");
 		WriteMessage w = workerSendPort.newMessage();
 		w.writeInt(value);
 		w.finish();
