@@ -15,8 +15,6 @@ public class Worker {
 	 */
 	private IbisIdentifier server = null;
 
-	private Ibis myIbis = null;
-
 	private SendPort workerSendPort = null;
 
 	private ReceivePort workerReceivePort = null;
@@ -69,8 +67,8 @@ public class Worker {
 
 		cache = new CubeCache(cubeSize);
 		this.rubiks = rubiks;
-		workerSendPort = myIbis.createSendPort(Rubiks.portManyToOne);
-		workerReceivePort = myIbis.createReceivePort(Rubiks.portManyToOne,
+		workerSendPort = rubiks.myIbis.createSendPort(Rubiks.portManyToOne);
+		workerReceivePort = rubiks.myIbis.createReceivePort(Rubiks.portManyToOne,
 				"receive port");
 		workerReceivePort.enableConnections();
 	}
