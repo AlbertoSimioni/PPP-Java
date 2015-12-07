@@ -43,6 +43,8 @@ public class Rubiks {
     
 	public Ibis myIbis = null;
 	
+    public IbisIdentifier[] ibisNodes = null;
+	
     public static final boolean PRINT_SOLUTION = false;
 
     /**
@@ -123,6 +125,7 @@ public class Rubiks {
         // sleep for a second
         Thread.sleep(500);
         
+        ibisNodes  = myIbis.registry().joinedIbises();
         /*
         System.out.println("NUMBER OF JOINED NODES:" + ibisNodes.length);
         for(IbisIdentifier ibisids : ibisNodes){

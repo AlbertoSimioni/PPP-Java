@@ -16,10 +16,7 @@ public class Server {
     
     private ReceivePort serverReceivePort = null;
     
-    /**
-     * Identifiers of the nodes that are active inside the current execution
-     */
-    private IbisIdentifier[] ibisNodes = null;
+
     
     /**
      * Starting cube
@@ -59,7 +56,7 @@ public class Server {
     private void serverComputation() throws Exception{
         int bound = 0;
         int result = 0;
-        for(IbisIdentifier ibis: ibisNodes){
+        for(IbisIdentifier ibis: rubiks.ibisNodes){
         	serverSendPort.connect(ibis, "receive port");
         }
     	while (result == 0) {
@@ -85,7 +82,7 @@ public class Server {
     
     private int collectResultsFromWorkers() throws Exception{
     	int solutionsFinded = 0;
-    	for(int i = 0; i < ibisNodes.length -1; i++){
+    	for(int i = 0; i < rubiks.ibisNodes.length -1; i++){
 	    	ReadMessage r = serverReceivePort.receive(); 
 	        solutionsFinded += r.readInt();
 	        r.finish();
@@ -156,7 +153,7 @@ public class Server {
     
     
     private void sendMessageToAllWorkers (String message) throws Exception{
-    	for(IbisIdentifier ibisNode : ibisNodes){
+    	for(IbisIdentifier ibisNode : rubiks.ibisNodes){
     		if(ibisNode != rubiks.myIbis.identifier()){
     			//serverSendPort.connect(ibisNode, "receive port");
 	        	WriteMessage w = serverSendPort.newMessage();
