@@ -56,7 +56,7 @@ public class Server {
         int bound = 0;
         int result = 0;
         for(IbisIdentifier ibis: rubiks.ibisNodes){
-        	if(!(ibis.name().equals(rubiks.myIbis.identifier())))
+        	if(!ibis.equals(rubiks.myIbis.identifier()))
         		serverSendPort.connect(ibis, "receive port");
         }
     	while (result == 0) {
@@ -154,7 +154,7 @@ public class Server {
     
     private void sendMessageToAllWorkers (String message) throws Exception{
     	for(IbisIdentifier ibisNode : rubiks.ibisNodes){
-    		if(!ibisNode.name().equals(rubiks.myIbis.identifier())){
+    		if(!ibisNode.equals(rubiks.myIbis.identifier())){
     			//serverSendPort.connect(ibisNode, "receive port");
 	        	WriteMessage w = serverSendPort.newMessage();
 	        	w.writeString("PAUSE");
