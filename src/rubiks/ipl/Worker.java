@@ -54,7 +54,7 @@ public class Worker {
 	}
 
 	private void sendResultToServer(int value) throws Exception {
-		workerSendPort.connect(rubiks.server, "receive port");
+		//workerSendPort.connect(rubiks.server, "receive port");
 		WriteMessage w = workerSendPort.newMessage();
 		w.writeInt(value);
 		w.finish();

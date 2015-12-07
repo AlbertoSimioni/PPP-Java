@@ -45,7 +45,6 @@ public class Server {
                 IbisIdentifier workerId = r.origin().ibisIdentifier();
                 r.finish();
                 if(s.equals(Rubiks.READY_FOR_NEW_JOBS)){
-                	serverSendPort.connect(workerId, "receive port");
                 	WriteMessage w = serverSendPort.newMessage();
                 	w.writeObject(child);
                     w.finish();
@@ -60,6 +59,9 @@ public class Server {
     private void serverComputation() throws Exception{
         int bound = 0;
         int result = 0;
+        for(IbisIdentifier ibis: ibisNodes){
+        	serverSendPort.connect(ibis, "receive port");
+        }
     	while (result == 0) {
             bound++;
             startCube.setBound(bound);
@@ -156,7 +158,7 @@ public class Server {
     private void sendMessageToAllWorkers (String message) throws Exception{
     	for(IbisIdentifier ibisNode : ibisNodes){
     		if(ibisNode != rubiks.myIbis.identifier()){
-    			serverSendPort.connect(ibisNode, "receive port");
+    			//serverSendPort.connect(ibisNode, "receive port");
 	        	WriteMessage w = serverSendPort.newMessage();
 	        	w.writeString("PAUSE");
 	            w.finish();
