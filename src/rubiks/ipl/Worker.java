@@ -64,7 +64,7 @@ public class Worker {
 		cache = new CubeCache(cubeSize);
 		this.rubiks = rubiks;
 		workerSendPort = rubiks.myIbis.createSendPort(Rubiks.portManyToOne);
-		workerReceivePort = rubiks.myIbis.createReceivePort(Rubiks.portManyToOne,
+		workerReceivePort = rubiks.myIbis.createReceivePort(Rubiks.portOneToMany,
 				"receive port");
 		workerReceivePort.enableConnections();
 	}
