@@ -57,7 +57,8 @@ public class Server {
         int bound = 0;
         int result = 0;
         for(IbisIdentifier ibis: rubiks.ibisNodes){
-        	serverSendPort.connect(ibis, "receive port");
+        	if(ibis != rubiks.server)
+        		serverSendPort.connect(ibis, "receive port");
         }
     	while (result == 0) {
             bound++;
