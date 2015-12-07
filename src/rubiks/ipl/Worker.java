@@ -25,11 +25,10 @@ public class Worker {
 		workerSendPort.connect(rubiks.server, "receive port");
 		while (!end) {
 			// asking for a new job
-			Thread.sleep(5000);
 			WriteMessage w = workerSendPort.newMessage();
 			w.writeString(Rubiks.READY_FOR_NEW_JOBS);
 			w.finish();
-
+			System.out.println("PORCA MADONNA" + rubiks.myIbis.identifier());
 			// receiving the new job
 			ReadMessage r = workerReceivePort.receive();
 			try {

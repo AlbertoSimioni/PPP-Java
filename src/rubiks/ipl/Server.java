@@ -105,8 +105,7 @@ public class Server {
         int seed = 0;
         String fileName = null;
 
-        // number of threads used to solve puzzle
-        // (not used in sequential version)
+
 
         for (int i = 0; i < arguments.length; i++) {
             if (arguments[i].equalsIgnoreCase("--size")) {
