@@ -24,6 +24,7 @@ public class Worker {
 		int solutionsFinded = 0;
 		while (!end) {
 			// asking for a new job
+			Thread.sleep(2000);
 			workerSendPort.connect(rubiks.server, "receive port");
 			WriteMessage w = workerSendPort.newMessage();
 			w.writeString(Rubiks.READY_FOR_NEW_JOBS);
