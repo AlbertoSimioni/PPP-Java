@@ -71,6 +71,7 @@ public class Server {
             	generateJobsForCurrentBound(startCube,cache, bound);
         		sendMessageToAllWorkers(Rubiks.PAUSE_WORKER_COMPUTATION);
         		result = collectResultsFromWorkers();
+        		System.out.println(" " + result);
             	//ora dovrei checkare se sono state trovate soluzioni
             }
     	}
