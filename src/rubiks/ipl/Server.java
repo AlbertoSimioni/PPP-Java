@@ -29,14 +29,15 @@ public class Server {
     private Rubiks rubiks;
     
     private void generateJobsForCurrentBound(Cube cube,CubeCache cache, int bound)throws IOException{
-        if (cube.getTwists() >= cube.getBound()) {
+        
+    	if (cube.getTwists() >= cube.getBound()) {
             return;
         }
         // generate all possible cubes from this one by twisting it in
         // every possible way. Gets new objects from the cache
         Cube[] children = cube.generateChildren(cache); //****
         for (Cube child : children) {
-        	if(cube.getTwists() == 3){
+        	if(cube.getTwists() > 3){
         		ReadMessage r = serverReceivePort.receive(); 
                 String s = r.readString();
                 r.finish();
@@ -46,8 +47,8 @@ public class Server {
                     w.finish();
                 }
         	}
-        	else generateJobsForCurrentBound(child, cache, bound);
-            cache.put(child);
+        	else generateJobsForCurrentBound(child, cache, bound); // recursive call
+            cache.put(child); 
         }
     }
     
@@ -63,10 +64,10 @@ public class Server {
             bound++;
             startCube.setBound(bound);
             System.out.print(" " + bound);
-            if(bound <= 3){
-            	result = Rubiks.solutions(startCube,cache);
+            if(bound <= 3){ // local computation
+            	result = Rubiks.solutions(startCube,cache); 
             }
-            else{
+            else{  //send work to workers
             	generateJobsForCurrentBound(startCube,cache, bound);
         		sendMessageToAllWorkers(Rubiks.PAUSE_WORKER_COMPUTATION);
         		result = collectResultsFromWorkers();
@@ -98,7 +99,6 @@ public class Server {
     private void createStartCube(String[] arguments){
     	//3)SERVER CREATE THE CUBE
     	
-
         // default parameters of puzzle
         int size = 3;
         int twists = 11;
@@ -170,7 +170,6 @@ public class Server {
 		serverReceivePort = rubiks.myIbis.createReceivePort(Rubiks.portManyToOne, "receive port");
 		serverReceivePort.enableConnections();
 		serverComputation();
-		sendMessageToAllWorkers(Rubiks.FINALIZE_MESSAGE);
     }
     
     
