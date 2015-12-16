@@ -43,12 +43,11 @@ public class Master {
     	if (cube.getTwists() >= cube.getBound()) {
             return;
         }
-    	System.out.println("diocan");
         // generate all possible cubes from this one by twisting it in
         // every possible way. Gets new objects from the cache
         Cube[] children = cube.generateChildren(cache); //****
         for (Cube child : children) {
-        	if(cube.getTwists() > 3){
+        	if(cube.getTwists() >= 3){
         		ReadMessage r = masterReceivePort.receive(); 
                 String s = r.readString();
                 IbisIdentifier currentWorker = r.origin().ibisIdentifier();
