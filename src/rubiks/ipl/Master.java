@@ -111,6 +111,7 @@ public class Master {
 	        solutionsFinded += solutions;
 	        r.finish();
     	}
+    	System.out.println("Finished to collect results from workers");
     	return solutionsFinded;
     }
     
