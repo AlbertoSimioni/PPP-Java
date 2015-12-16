@@ -35,7 +35,7 @@ public class Worker {
 				Cube cube = (Cube) r.readObject();
 				r.finish();
 				solutionsFinded += Rubiks.solutions(cube, cache);
-			} catch (ClassNotFoundException exc) {
+			} catch (ClassCastException exc) {
 				String message = r.readString();
 				if(message.equals(Rubiks.PAUSE_WORKER_COMPUTATION)){
 					sendResultToMaster(solutionsFinded);
@@ -47,8 +47,8 @@ public class Worker {
 				else{
 					System.out.println("UNKNOWN MESSAGE");
 				}
-			} catch (ClassCastException exc) {
-				System.out.println("ClassCastException");
+			} catch (ClassNotFoundException exc) {
+				System.out.println("ClassNotFoundException");
 			}
 
 		}
