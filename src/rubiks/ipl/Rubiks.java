@@ -16,11 +16,11 @@ import ibis.ipl.PortType;
 public class Rubiks {
 	
 
-    static PortType portOneToMany = new PortType(PortType.COMMUNICATION_RELIABLE, //reliable communications and election
+    static PortType portMasterToWorker = new PortType(PortType.COMMUNICATION_RELIABLE, //reliable communications and election
             PortType.SERIALIZATION_OBJECT, PortType.RECEIVE_EXPLICIT,  //one_to_one, string can be sent
-            PortType.CONNECTION_ONE_TO_MANY);
+            PortType.CONNECTION_ONE_TO_ONE);
     
-    static PortType portManyToOne = new PortType(PortType.COMMUNICATION_RELIABLE, //reliable communications and election
+    static PortType portWorkerToMaster = new PortType(PortType.COMMUNICATION_RELIABLE, //reliable communications and election
             PortType.SERIALIZATION_OBJECT, PortType.RECEIVE_EXPLICIT,  //one_to_one, string can be sent
             PortType.CONNECTION_MANY_TO_ONE);
 
@@ -33,7 +33,7 @@ public class Rubiks {
     /**
      * Identifier of the server node
      */
-    public IbisIdentifier server = null;
+    public IbisIdentifier master = null;
     
     static String READY_FOR_NEW_JOBS = "r";
     
@@ -74,7 +74,7 @@ public class Rubiks {
 
         for (Cube child : children) {
             // recursion step
-            int childSolutions = solutions(child, cache);
+            int childSolutions = solutions(child, cache); //recursive call
             if (childSolutions > 0) {
                 result += childSolutions;
                 if (PRINT_SOLUTION) {
@@ -121,7 +121,7 @@ public class Rubiks {
      * @throws Exception if something goes wrong due to connection problem
      */
     private void initialize() throws Exception {
-    	myIbis = IbisFactory.createIbis(ibisCapabilities, null,portOneToMany,portManyToOne);
+    	myIbis = IbisFactory.createIbis(ibisCapabilities, null,portMasterToWorker,portWorkerToMaster);
         // sleep for a second
         Thread.sleep(500);
         
@@ -133,7 +133,7 @@ public class Rubiks {
         }*/
         
         // Elect a server
-        server = myIbis.registry().elect("Server");
+        master = myIbis.registry().elect("Master");
 
        // System.out.println("Server is " + server);    
     }
@@ -145,8 +145,8 @@ public class Rubiks {
     	}
     	initialize();
     	
-    	if (server.equals(myIbis.identifier())) {
-    		new Server(arguments,this);
+    	if (master.equals(myIbis.identifier())) {
+    		new Master(arguments,this);
         } else {
             new Worker(size,this).workerComputation();
         }

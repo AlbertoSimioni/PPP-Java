@@ -4,17 +4,22 @@ import java.io.IOException;
 
 
 
+import java.util.HashMap;
+import java.util.Map;
+
 import ibis.ipl.IbisIdentifier;
 import ibis.ipl.ReadMessage;
 import ibis.ipl.ReceivePort;
 import ibis.ipl.SendPort;
 import ibis.ipl.WriteMessage;
 
-public class Server {
+public class Master {
 	
-    private SendPort serverSendPort = null;
     
-    private ReceivePort serverReceivePort = null;
+    
+    private Map<IbisIdentifier,SendPort> masterSendPorts = new HashMap<IbisIdentifier,SendPort>();
+    
+    private ReceivePort masterReceivePort = null;
     
 
     
@@ -28,6 +33,11 @@ public class Server {
     
     private Rubiks rubiks;
     
+    private SendPort getSendPort(IbisIdentifier receiver){
+    	return masterSendPorts.get(receiver);
+    }
+    
+    
     private void generateJobsForCurrentBound(Cube cube,CubeCache cache, int bound)throws IOException{
         
     	if (cube.getTwists() >= cube.getBound()) {
@@ -38,11 +48,13 @@ public class Server {
         Cube[] children = cube.generateChildren(cache); //****
         for (Cube child : children) {
         	if(cube.getTwists() > 3){
-        		ReadMessage r = serverReceivePort.receive(); 
+        		ReadMessage r = masterReceivePort.receive(); 
                 String s = r.readString();
+                IbisIdentifier currentWorker = r.origin().ibisIdentifier();
                 r.finish();
                 if(s.equals(Rubiks.READY_FOR_NEW_JOBS)){
-                	WriteMessage w = serverSendPort.newMessage();
+                	SendPort port = getSendPort(currentWorker);
+                	WriteMessage w = port.newMessage();
                 	w.writeObject(child);
                     w.finish();
                 }
@@ -53,13 +65,20 @@ public class Server {
     }
     
     
-    private void serverComputation() throws Exception{
+    private void createSendPorts() throws Exception{
+        for(IbisIdentifier ibis: rubiks.ibisNodes){
+        	if(!ibis.equals(rubiks.myIbis.identifier())){
+        		SendPort port = rubiks.myIbis.createSendPort(Rubiks.portMasterToWorker);
+        		port.connect(ibis, "receive port");
+        		masterSendPorts.put(ibis,port);
+        	}
+        }
+    }
+    
+    private void masterComputation() throws Exception{
         int bound = 0;
         int result = 0;
-        for(IbisIdentifier ibis: rubiks.ibisNodes){
-        	if(!ibis.equals(rubiks.myIbis.identifier()))
-        		serverSendPort.connect(ibis, "receive port");
-        }
+        createSendPorts();
     	while (result == 0) {
             bound++;
             startCube.setBound(bound);
@@ -85,8 +104,10 @@ public class Server {
     private int collectResultsFromWorkers() throws Exception{
     	int solutionsFinded = 0;
     	for(int i = 0; i < rubiks.ibisNodes.length -1; i++){
-	    	ReadMessage r = serverReceivePort.receive(); 
-	        solutionsFinded += r.readInt();
+	    	ReadMessage r = masterReceivePort.receive(); 
+	    	int solutions = r.readInt();
+	    	if(solutions < 0 | solutions > 30000) { System.out.println("WEIRD SOLUTIONS");}
+	        solutionsFinded += solutions;
 	        r.finish();
     	}
     	return solutionsFinded;
@@ -151,26 +172,35 @@ public class Server {
    
     }
     
-    
+    // waits a message from a worker and then send him the message
     private void sendMessageToAllWorkers (String message) throws Exception{
     	for(IbisIdentifier ibisNode : rubiks.ibisNodes){
     		if(!ibisNode.equals(rubiks.myIbis.identifier())){
     			//serverSendPort.connect(ibisNode, "receive port");
-	        	WriteMessage w = serverSendPort.newMessage();
-	        	w.writeString("PAUSE");
-	            w.finish();
+    			ReadMessage r = masterReceivePort.receive(); 
+                String s = r.readString();
+                IbisIdentifier currentWorker = r.origin().ibisIdentifier();
+                r.finish();
+                if(s.equals(Rubiks.READY_FOR_NEW_JOBS)){
+                	SendPort port = getSendPort(currentWorker);
+                	WriteMessage w = port.newMessage();
+                	w.writeString("PAUSE");
+                	w.finish();
+                }
+                else{
+                	System.out.println("Unknown message from client");
+                }
     		}
     	}
     }
     
-    public Server(String[] arguments, Rubiks rubiks) throws Exception{
+    public Master(String[] arguments, Rubiks rubiks) throws Exception{
        	createStartCube(arguments);
        	this.rubiks = rubiks;
     	cache = new CubeCache(startCube.getSize());
-		serverSendPort = rubiks.myIbis.createSendPort(Rubiks.portOneToMany);
-		serverReceivePort = rubiks.myIbis.createReceivePort(Rubiks.portManyToOne, "receive port");
-		serverReceivePort.enableConnections();
-		serverComputation();
+		masterReceivePort = rubiks.myIbis.createReceivePort(Rubiks.portWorkerToMaster, "receive port");
+		masterReceivePort.enableConnections();
+		masterComputation();
     }
     
     
