@@ -48,12 +48,12 @@ public class Master {
         Cube[] children = cube.generateChildren(cache); //****
         for (Cube child : children) {
         	if(cube.getTwists() >= 3){
-        		System.out.println("MADONNA PUTTANA");
         		ReadMessage r = masterReceivePort.receive(); 
                 String s = r.readString();
                 IbisIdentifier currentWorker = r.origin().ibisIdentifier();
                 r.finish();
                 if(s.equals(Rubiks.READY_FOR_NEW_JOBS)){
+            		System.out.println("MADONNA PUTTANA");
                 	SendPort port = getSendPort(currentWorker);
                 	WriteMessage w = port.newMessage();
                 	w.writeObject(child);

@@ -33,7 +33,6 @@ public class Worker {
 			ReadMessage r = workerReceivePort.receive();
 			try {
 				Cube cube = (Cube) r.readObject();
-				System.out.println("PORCA MADONNA");
 				r.finish();
 				solutionsFinded += Rubiks.solutions(cube, cache);
 			} catch (ClassCastException exc) {
@@ -41,7 +40,6 @@ public class Worker {
 
 				String message = r.readString();
 				if(message.equals(Rubiks.PAUSE_WORKER_COMPUTATION)){
-					System.out.println("PORCA MADONNA2");
 					sendResultToMaster(solutionsFinded);
 					solutionsFinded = 0;
 				}
@@ -61,6 +59,7 @@ public class Worker {
 
 	private void sendResultToMaster(int value) throws Exception {
 		//workerSendPort.connect(rubiks.server, "receive port");
+		System.out.println("quante porche madonne? " + value);
 		WriteMessage w = workerSendPort.newMessage();
 		w.writeInt(value);
 		w.finish();
