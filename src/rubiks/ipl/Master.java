@@ -39,7 +39,7 @@ public class Master {
     
     
     private void generateJobsForCurrentBound(Cube cube,CubeCache cache, int bound)throws IOException{
-        
+        System.out.println("Generate");
     	if (cube.getTwists() >= cube.getBound()) {
             return;
         }
@@ -53,7 +53,6 @@ public class Master {
                 IbisIdentifier currentWorker = r.origin().ibisIdentifier();
                 r.finish();
                 if(s.equals(Rubiks.READY_FOR_NEW_JOBS)){
-            		System.out.println("MADONNA PUTTANA");
                 	SendPort port = getSendPort(currentWorker);
                 	WriteMessage w = port.newMessage();
                 	w.writeObject(child);
@@ -103,6 +102,7 @@ public class Master {
     
     
     private int collectResultsFromWorkers() throws Exception{
+    	System.out.println("starting to collect results from workers");
     	int solutionsFinded = 0;
     	for(int i = 0; i < rubiks.ibisNodes.length -1; i++){
 	    	ReadMessage r = masterReceivePort.receive(); 
@@ -175,6 +175,7 @@ public class Master {
     
     // waits a message from a worker and then send him the message
     private void sendMessageToAllWorkers (String message) throws Exception{
+    	System.out.println("Starting sending messages to workers");
     	for(IbisIdentifier ibisNode : rubiks.ibisNodes){
     		if(!ibisNode.equals(rubiks.myIbis.identifier())){
     			//serverSendPort.connect(ibisNode, "receive port");
@@ -187,12 +188,14 @@ public class Master {
                 	WriteMessage w = port.newMessage();
                 	w.writeString(message);
                 	w.finish();
+                	System.out.println("message sent to worker");
                 }
                 else{
                 	System.out.println("Unknown message from client");
                 }
     		}
     	}
+    	System.out.println("all messages sent");
     }
     
     public Master(String[] arguments, Rubiks rubiks) throws Exception{
