@@ -33,6 +33,7 @@ public class Worker {
 			ReadMessage r = workerReceivePort.receive();
 			try {
 				Cube cube = (Cube) r.readObject();
+				System.out.println("PORCA MADONNA");
 				r.finish();
 				solutionsFinded += Rubiks.solutions(cube, cache);
 			} catch (ClassCastException exc) {
