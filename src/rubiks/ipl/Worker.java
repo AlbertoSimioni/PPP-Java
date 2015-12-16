@@ -33,12 +33,12 @@ public class Worker {
 			ReadMessage r = workerReceivePort.receive();
 			try {
 				Cube cube = (Cube) r.readObject();
-
+				System.out.println("PORCA MADONNA");
 				r.finish();
 				solutionsFinded += Rubiks.solutions(cube, cache);
 			} catch (ClassCastException exc) {
 				
-				System.out.println("PORCA MADONNA");
+
 				String message = r.readString();
 				if(message.equals(Rubiks.PAUSE_WORKER_COMPUTATION)){
 					System.out.println("PORCA MADONNA2");

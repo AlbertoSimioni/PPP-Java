@@ -48,6 +48,7 @@ public class Master {
         Cube[] children = cube.generateChildren(cache); //****
         for (Cube child : children) {
         	if(cube.getTwists() >= 3){
+        		System.out.println("MADONNA PUTTANA");
         		ReadMessage r = masterReceivePort.receive(); 
                 String s = r.readString();
                 IbisIdentifier currentWorker = r.origin().ibisIdentifier();
