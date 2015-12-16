@@ -31,19 +31,23 @@ public class Worker {
 
 				// receiving the new job
 				ReadMessage r = workerReceivePort.receive();
-				String message = r.readString();
-				if (message.equals(Rubiks.PAUSE_WORKER_COMPUTATION)) {
-					sendResultToMaster(solutionsFinded);
-					solutionsFinded = 0;
-					r.finish();
-				} else if (message.equals(Rubiks.FINALIZE_MESSAGE)) {
-					end = true;
-					r.finish();
-				} else {
+				try {
+					String message = r.readString();
+					if (message.equals(Rubiks.PAUSE_WORKER_COMPUTATION)) {
+						sendResultToMaster(solutionsFinded);
+						solutionsFinded = 0;
+						r.finish();
+					} else if (message.equals(Rubiks.FINALIZE_MESSAGE)) {
+						end = true;
+						r.finish();
+
+					}
+				} catch (Exception exc) {
 					Cube cube = (Cube) r.readObject();
 					r.finish();
 					solutionsFinded += Rubiks.solutions(cube, cache);
 				}
+
 			}
 
 		} catch (Exception exc) {
