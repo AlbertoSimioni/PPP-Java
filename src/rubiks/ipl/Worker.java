@@ -1,8 +1,6 @@
 package rubiks.ipl;
 
-import ibis.ipl.Ibis;
-import ibis.ipl.IbisFactory;
-import ibis.ipl.IbisIdentifier;
+
 import ibis.ipl.ReadMessage;
 import ibis.ipl.ReceivePort;
 import ibis.ipl.SendPort;
