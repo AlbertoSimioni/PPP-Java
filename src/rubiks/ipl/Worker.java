@@ -28,7 +28,7 @@ public class Worker {
 				w.finish();
 				System.out.println("cazzo");
 				// receiving the new job
-				ReadMessage r = workerReceivePort.receive();
+				ReadMessage r = workerReceivePort.receive(2000);
 				try {
 					String message = r.readString();
 					if (message.equals(Rubiks.PAUSE_WORKER_COMPUTATION)) {
