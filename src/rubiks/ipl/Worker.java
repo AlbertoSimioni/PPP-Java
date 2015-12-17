@@ -1,6 +1,5 @@
 package rubiks.ipl;
 
-
 import ibis.ipl.ReadMessage;
 import ibis.ipl.ReceivePort;
 import ibis.ipl.SendPort;
@@ -26,25 +25,25 @@ public class Worker {
 				WriteMessage w = workerSendPort.newMessage();
 				w.writeString(Rubiks.READY_FOR_NEW_JOBS);
 				w.finish();
-				
 				// receiving the new job
 				ReadMessage r = workerReceivePort.receive(2000);
-				try {
-					String message = r.readString();
-					if (message.equals(Rubiks.PAUSE_WORKER_COMPUTATION)) {
-						sendResultToMaster(solutionsFinded);
-						solutionsFinded = 0;
-						r.finish();
-					} else if (message.equals(Rubiks.FINALIZE_MESSAGE)) {
-						end = true;
-						r.finish();
-
-					}
-				} catch (Exception exc) {
+				
+				if (r.readObject() instanceof Cube) {
 					Cube cube = (Cube) r.readObject();
 					r.finish();
 					System.out.println("cazzo");
 					solutionsFinded += Rubiks.solutions(cube, cache);
+				} else {
+					String message = r.readString();
+					if (message.equals(Rubiks.PAUSE_WORKER_COMPUTATION)) {
+						sendResultToMaster(solutionsFinded);
+						solutionsFinded = 0;
+					} else if (message.equals(Rubiks.FINALIZE_MESSAGE)) {
+						end = true;
+					} else {
+						System.out.println("WEIRD MESSAGE FROM MASTER");
+					}
+					r.finish();
 				}
 
 			}
