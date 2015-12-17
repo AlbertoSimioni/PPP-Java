@@ -107,7 +107,7 @@ public class Master {
     private int collectResultsFromWorkers() throws Exception{
     	System.out.println("starting to collect results from workers");
     	int solutionsFinded = 0;
-    	for(int i = 0; i < rubiks.ibisNodes.length -1; i++){
+    	for(int i = 0; i < rubiks.ibisNodes.length; i++){
 	    	ReadMessage r = masterReceivePort.receive(); 
 	    	int solutions = r.readInt();
 	    	System.out.println("solutions: "+ solutions);
