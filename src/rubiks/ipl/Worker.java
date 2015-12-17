@@ -49,7 +49,7 @@ public class Worker {
 			}
 
 		} catch (Exception exc) {
-			System.out.println("EXCEPTION");
+			System.out.println(exc.getMessage());
 		}
 
 	}
