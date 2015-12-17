@@ -94,7 +94,6 @@ public class Master {
             	generateJobsForCurrentBound(startCube,cache);
         		sendMessageToAllWorkers(Rubiks.PAUSE_WORKER_COMPUTATION);
         		result = collectResultsFromWorkers();
-        		System.out.println(" " + result);
             	//ora dovrei checkare se sono state trovate soluzioni
             }
     	}
@@ -111,7 +110,7 @@ public class Master {
     	for(int i = 0; i < rubiks.ibisNodes.length -1; i++){
 	    	ReadMessage r = masterReceivePort.receive(); 
 	    	int solutions = r.readInt();
-	    	System.out.println(solutions);
+	    	System.out.println("solutions: "+ solutions);
 	    	r.finish();
 	    	if(solutions < 0 | solutions > 30000) { System.out.println("WEIRD SOLUTIONS");}
 	        solutionsFinded += solutions;

@@ -35,7 +35,6 @@ public class Worker {
 				try {
 					Cube cube = (Cube) o;
 					int sol = Rubiks.solutions(cube, cache);
-					if(sol > 1){ System.out.println(cube.toString() + " " + cube.getBound()); };
 					solutionsFinded += Rubiks.solutions(cube, cache);
 				} catch (Exception exc) {
 					String message = (String) o;
