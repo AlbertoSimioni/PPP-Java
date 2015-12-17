@@ -34,7 +34,7 @@ public class Master {
     private Rubiks rubiks;
     
     private SendPort getSendPort(IbisIdentifier receiver) throws IOException{
-    	System.out.println("GETTING "+ receiver.name());
+    	//System.out.println("GETTING "+ receiver.name());
     	SendPort port = masterSendPorts.get(receiver);
     	return port;
     }
@@ -111,9 +111,10 @@ public class Master {
     	for(int i = 0; i < rubiks.ibisNodes.length -1; i++){
 	    	ReadMessage r = masterReceivePort.receive(); 
 	    	int solutions = r.readInt();
+	    	r.finish();
 	    	if(solutions < 0 | solutions > 30000) { System.out.println("WEIRD SOLUTIONS");}
 	        solutionsFinded += solutions;
-	        r.finish();
+	       
     	}
     	System.out.println("Finished to collect results from workers");
     	return solutionsFinded;

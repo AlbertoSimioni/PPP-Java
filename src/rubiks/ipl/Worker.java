@@ -27,18 +27,19 @@ public class Worker {
 				w.finish();
 				// receiving the new job
 				ReadMessage r = workerReceivePort.receive(2000);
-				System.out.println("Ricevuto messaggio");
+				//System.out.println("Ricevuto messaggio");
 				try{
 					Object o = r.readObject();
 					System.out.println(o.toString());
 					if (o instanceof Cube) {
-						System.out.println("cazzo");
+						//System.out.println("cazzo");
 						r.finish();
 						Cube cube = (Cube) o;
 						solutionsFinded += Rubiks.solutions(cube, cache);
 					} else {
 						String message = r.readString();
-						System.out.println("cazzo1.5");
+						r.finish();
+						//System.out.println("cazzo1.5");
 						if (message.equals(Rubiks.PAUSE_WORKER_COMPUTATION)) {
 							sendResultToMaster(solutionsFinded);
 							solutionsFinded = 0;
@@ -49,7 +50,7 @@ public class Worker {
 						} else {
 							System.out.println("WEIRD MESSAGE FROM MASTER");
 						}
-						r.finish();
+						
 					}
 				} catch(Exception exc){
 					System.out.println(exc.getMessage());
