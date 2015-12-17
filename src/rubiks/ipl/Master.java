@@ -39,7 +39,7 @@ public class Master {
     }
     
     
-    private void generateJobsForCurrentBound(Cube cube,CubeCache cache, int bound)throws IOException{
+    private void generateJobsForCurrentBound(Cube cube,CubeCache cache)throws IOException{
         System.out.println("Generate");
     	if (cube.getTwists() >= cube.getBound()) {
             return;
@@ -48,7 +48,7 @@ public class Master {
         // every possible way. Gets new objects from the cache
         Cube[] children = cube.generateChildren(cache); //****
         for (Cube child : children) {
-        	if(cube.getTwists() >= 3){
+        	if(child.getTwists() >= 3){
         		ReadMessage r = masterReceivePort.receive(); 
                 String s = r.readString();
                 IbisIdentifier currentWorker = r.origin().ibisIdentifier();
@@ -61,9 +61,8 @@ public class Master {
                     
                 }
         	}
-        	else generateJobsForCurrentBound(child, cache, bound); // recursive call
+        	else generateJobsForCurrentBound(child, cache); // recursive call
             cache.put(child); 
-            System.out.println("PORCODIO");
         }
     }
     
@@ -91,7 +90,7 @@ public class Master {
             	result = Rubiks.solutions(startCube,cache); 
             }
             else{  //send work to workers
-            	generateJobsForCurrentBound(startCube,cache, bound);
+            	generateJobsForCurrentBound(startCube,cache);
         		sendMessageToAllWorkers(Rubiks.PAUSE_WORKER_COMPUTATION);
         		result = collectResultsFromWorkers();
         		System.out.println(" " + result);
