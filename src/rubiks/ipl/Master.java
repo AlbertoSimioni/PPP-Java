@@ -58,6 +58,7 @@ public class Master {
                 	WriteMessage w = port.newMessage();
                 	w.writeObject(child);
                     w.finish();
+                    System.out.println("PORCODIO");
                 }
         	}
         	else generateJobsForCurrentBound(child, cache, bound); // recursive call
