@@ -109,6 +109,7 @@ public class Master {
     	int solutionsFinded = 0;
     	for(int i = 0; i < rubiks.ibisNodes.length; i++){
 	    	ReadMessage r = masterReceivePort.receive(); 
+	    	System.out.println(r.toString());
 	    	int solutions = r.readInt();
 	    	System.out.println("solutions: "+ solutions);
 	    	r.finish();
