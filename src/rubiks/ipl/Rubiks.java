@@ -37,6 +37,8 @@ public class Rubiks {
     
     static String READY_FOR_NEW_JOBS = "r";
     
+    static String CONTINUE_COMPUTATION = "c";
+    
     static String PAUSE_WORKER_COMPUTATION = "p";
     
     static String FINALIZE_MESSAGE = "f";

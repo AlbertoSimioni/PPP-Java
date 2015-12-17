@@ -117,6 +117,17 @@ public class Master {
 	       
     	}
     	System.out.println("Finished round, Solutions finded: " + solutionsFinded);
+    	String msg = Rubiks.CONTINUE_COMPUTATION;
+    	if(solutionsFinded > 0){
+    		msg = Rubiks.FINALIZE_MESSAGE;
+    	}
+    	for(IbisIdentifier ibisNode : rubiks.ibisNodes){
+    		SendPort port = getSendPort(ibisNode);
+        	WriteMessage w = port.newMessage();
+        	w.writeString(Rubiks.CONTINUE_COMPUTATION);
+        	w.finish();
+    	}
+    	
     	return solutionsFinded;
     }
     

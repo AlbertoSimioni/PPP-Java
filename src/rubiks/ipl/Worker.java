@@ -38,17 +38,20 @@ public class Worker {
 					solutionsFinded += sol;
 				} catch (Exception exc) {
 					String message = (String) o;
-					//r.finish();
-					System.out.println("cazzo1.5");
 					if (message.equals(Rubiks.PAUSE_WORKER_COMPUTATION)) {
 						sendResultToMaster(solutionsFinded);
 						solutionsFinded = 0;
-						System.out.println("cazzo2");
-					} else if (message.equals(Rubiks.FINALIZE_MESSAGE)) {
-						end = true;
-						System.out.println("cazzo3");
+						ReadMessage rm = workerReceivePort.receive(10000);
+						String msg = rm.readString();
+						rm.finish();
+						if(msg.equals(Rubiks.FINALIZE_MESSAGE)){
+							end = true;
+						}
+						else if(!msg.equals(Rubiks.CONTINUE_COMPUTATION)){
+							System.out.println("WEIRD MESSAGE FROM MASTER1");
+						}
 					} else {
-						System.out.println("WEIRD MESSAGE FROM MASTER");
+						System.out.println("WEIRD MESSAGE FROM MASTER2");
 					}
 				}
 
