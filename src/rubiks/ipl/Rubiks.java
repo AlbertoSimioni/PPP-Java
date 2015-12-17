@@ -17,7 +17,7 @@ public class Rubiks {
 	
 
     static PortType portMasterToWorker = new PortType(PortType.COMMUNICATION_RELIABLE, //reliable communications and election
-            PortType.SERIALIZATION_OBJECT, PortType.RECEIVE_EXPLICIT,  //one_to_one, string can be sent
+            PortType.SERIALIZATION_OBJECT, PortType.RECEIVE_TIMEOUT,  //one_to_one, string can be sent
             PortType.CONNECTION_ONE_TO_ONE);
     
     static PortType portWorkerToMaster = new PortType(PortType.COMMUNICATION_RELIABLE, //reliable communications and election
