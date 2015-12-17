@@ -27,7 +27,7 @@ public class Worker {
 				w.finish();
 				// receiving the new job
 				ReadMessage r = workerReceivePort.receive(2000);
-				
+				System.out.println("Ricevuto messaggio");
 				if (r.readObject() instanceof Cube) {
 					Cube cube = (Cube) r.readObject();
 					r.finish();
@@ -38,8 +38,10 @@ public class Worker {
 					if (message.equals(Rubiks.PAUSE_WORKER_COMPUTATION)) {
 						sendResultToMaster(solutionsFinded);
 						solutionsFinded = 0;
+						System.out.println("cazzo2");
 					} else if (message.equals(Rubiks.FINALIZE_MESSAGE)) {
 						end = true;
+						System.out.println("cazzo3");
 					} else {
 						System.out.println("WEIRD MESSAGE FROM MASTER");
 					}
