@@ -32,9 +32,9 @@ public class Worker {
 					Object o = r.readObject();
 					System.out.println(o.toString());
 					if (o instanceof Cube) {
-						Cube cube = (Cube) r.readObject();
-						r.finish();
 						System.out.println("cazzo");
+						r.finish();
+						Cube cube = (Cube) o;
 						solutionsFinded += Rubiks.solutions(cube, cache);
 					} else {
 						String message = r.readString();
