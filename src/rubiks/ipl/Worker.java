@@ -35,6 +35,7 @@ public class Worker {
 					solutionsFinded += Rubiks.solutions(cube, cache);
 				} else {
 					String message = r.readString();
+					System.out.println("cazzo1.5");
 					if (message.equals(Rubiks.PAUSE_WORKER_COMPUTATION)) {
 						sendResultToMaster(solutionsFinded);
 						solutionsFinded = 0;
