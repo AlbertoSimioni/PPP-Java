@@ -65,7 +65,7 @@ public class Master {
         	else generateJobsForCurrentBound(child, cache); // recursive call
             cache.put(child); 
         }
-        System.out.println("MADDONNA GESUITA");
+        //System.out.println("MADDONNA GESUITA");
     }
     
     
@@ -209,7 +209,7 @@ public class Master {
     	createStartCube(arguments);
        	this.rubiks = rubiks;
     	cache = new CubeCache(startCube.getSize());
-		masterReceivePort = rubiks.myIbis.createReceivePort(Rubiks.portWorkerToMaster, "receive port");
+		master	Port = rubiks.myIbis.createReceivePort(Rubiks.portWorkerToMaster, "receive port");
 		masterReceivePort.enableConnections();
 		masterComputation();
        	} catch(Exception exc){
