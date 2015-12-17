@@ -209,7 +209,7 @@ public class Master {
     	createStartCube(arguments);
        	this.rubiks = rubiks;
     	cache = new CubeCache(startCube.getSize());
-		master	Port = rubiks.myIbis.createReceivePort(Rubiks.portWorkerToMaster, "receive port");
+		masterReceivePort = rubiks.myIbis.createReceivePort(Rubiks.portWorkerToMaster, "receive port");
 		masterReceivePort.enableConnections();
 		masterComputation();
        	} catch(Exception exc){
