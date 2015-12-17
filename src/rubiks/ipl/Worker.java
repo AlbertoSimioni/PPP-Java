@@ -19,10 +19,10 @@ public class Worker {
 	public void workerComputation() throws Exception {
 		boolean end = false;
 		int solutionsFinded = 0;
+		workerSendPort.connect(rubiks.master, "receive port");
 		try {
 			while (!end) {
 				// asking for a new job
-				workerSendPort.connect(rubiks.master, "receive port");
 				WriteMessage w = workerSendPort.newMessage();
 				w.writeString(Rubiks.READY_FOR_NEW_JOBS);
 				w.finish();

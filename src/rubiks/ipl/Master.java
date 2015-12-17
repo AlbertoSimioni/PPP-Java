@@ -36,7 +36,6 @@ public class Master {
     private SendPort getSendPort(IbisIdentifier receiver) throws IOException{
     	System.out.println("GETTING "+ receiver.name());
     	SendPort port = masterSendPorts.get(receiver);
-    	port.connect(receiver, "receive port");
     	return port;
     }
     
@@ -75,6 +74,7 @@ public class Master {
         	if(!ibis.equals(rubiks.myIbis.identifier())){
         		SendPort port = rubiks.myIbis.createSendPort(Rubiks.portMasterToWorker);
         		masterSendPorts.put(ibis,port);
+            	port.connect(ibis, "receive port");
         	}
         }
     }
