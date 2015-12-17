@@ -35,7 +35,7 @@ public class Worker {
 				try {
 					Cube cube = (Cube) o;
 					int sol = Rubiks.solutions(cube, cache);
-					solutionsFinded += Rubiks.solutions(cube, cache);
+					solutionsFinded += sol;
 				} catch (Exception exc) {
 					String message = (String) o;
 					//r.finish();
@@ -64,7 +64,7 @@ public class Worker {
 		// workerSendPort.connect(rubiks.server, "receive port");
 		System.out.println("quante porche madonne? " + value);
 		WriteMessage w = workerSendPort.newMessage();
-		w.writeInt(value);
+		w.writeString(Integer.toString(value));
 		w.finish();
 	}
 

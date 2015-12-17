@@ -109,8 +109,7 @@ public class Master {
     	int solutionsFinded = 0;
     	for(int i = 0; i < rubiks.ibisNodes.length; i++){
 	    	ReadMessage r = masterReceivePort.receive(); 
-	    	System.out.println(r.toString());
-	    	int solutions = r.readInt();
+	    	int solutions = Integer.parseInt(r.readString());
 	    	System.out.println("solutions: "+ solutions);
 	    	r.finish();
 	    	if(solutions < 0 | solutions > 30000) { System.out.println("WEIRD SOLUTIONS");}
