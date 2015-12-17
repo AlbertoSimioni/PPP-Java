@@ -22,7 +22,7 @@ public class Rubiks {
     
     static PortType portWorkerToMaster = new PortType(PortType.COMMUNICATION_RELIABLE, //reliable communications and election
             PortType.SERIALIZATION_OBJECT, PortType.RECEIVE_EXPLICIT,  //one_to_one, string can be sent
-            PortType.CONNECTION_ONE_TO_ONE);
+            PortType.CONNECTION_MANY_TO_ONE);
 
     static IbisCapabilities ibisCapabilities = new IbisCapabilities(
             IbisCapabilities.ELECTIONS_STRICT,
