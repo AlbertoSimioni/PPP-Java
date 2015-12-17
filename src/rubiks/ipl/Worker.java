@@ -30,7 +30,7 @@ public class Worker {
 				System.out.println("Ricevuto messaggio");
 				try{
 					Object o = r.readObject();
-					System.out.println("PORCOMAIALE");
+					System.out.println(o.toString());
 					if (o instanceof Cube) {
 						Cube cube = (Cube) r.readObject();
 						r.finish();
