@@ -26,14 +26,16 @@ public class Worker {
 				w.writeString(Rubiks.READY_FOR_NEW_JOBS);
 				w.finish();
 				// receiving the new job
-				ReadMessage r = workerReceivePort.receive(2000);
+				ReadMessage r = workerReceivePort.receive(10000);
 				// System.out.println("Ricevuto messaggio");
 				
 					Object o = r.readObject();
-					System.out.println("cazzo");
+					//System.out.println("cazzo");
 					r.finish();
 				try {
 					Cube cube = (Cube) o;
+					int sol = Rubiks.solutions(cube, cache);
+					if(sol > 1){ System.out.println(cube.toString() + " " + cube.getBound()); };
 					solutionsFinded += Rubiks.solutions(cube, cache);
 				} catch (Exception exc) {
 					String message = (String) o;

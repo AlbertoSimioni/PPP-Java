@@ -116,7 +116,7 @@ public class Master {
 	        solutionsFinded += solutions;
 	       
     	}
-    	System.out.println("Finished to collect results from workers");
+    	System.out.println("Finished round, Solutions finded: " + solutionsFinded);
     	return solutionsFinded;
     }
     
