@@ -28,16 +28,16 @@ public class Worker {
 				// receiving the new job
 				ReadMessage r = workerReceivePort.receive(2000);
 				// System.out.println("Ricevuto messaggio");
-				try {
+				
 					Object o = r.readObject();
-
 					System.out.println("cazzo");
 					r.finish();
+				try {
 					Cube cube = (Cube) o;
 					solutionsFinded += Rubiks.solutions(cube, cache);
 				} catch (Exception exc) {
-					String message = r.readString();
-					r.finish();
+					String message = (String) o;
+					//r.finish();
 					System.out.println("cazzo1.5");
 					if (message.equals(Rubiks.PAUSE_WORKER_COMPUTATION)) {
 						sendResultToMaster(solutionsFinded);
