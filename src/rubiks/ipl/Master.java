@@ -33,9 +33,11 @@ public class Master {
     
     private Rubiks rubiks;
     
-    private SendPort getSendPort(IbisIdentifier receiver){
+    private SendPort getSendPort(IbisIdentifier receiver) throws IOException{
     	System.out.println("GETTING "+ receiver.name());
-    	return masterSendPorts.get(receiver);
+    	SendPort port = masterSendPorts.get(receiver);
+    	port.connect(receiver, "receive port");
+    	return port;
     }
     
     
@@ -72,9 +74,7 @@ public class Master {
         for(IbisIdentifier ibis: rubiks.ibisNodes){
         	if(!ibis.equals(rubiks.myIbis.identifier())){
         		SendPort port = rubiks.myIbis.createSendPort(Rubiks.portMasterToWorker);
-        		port.connect(ibis, "receive port");
         		masterSendPorts.put(ibis,port);
-        		System.out.println(ibis.name());
         	}
         }
     }
@@ -204,12 +204,16 @@ public class Master {
     }
     
     public Master(String[] arguments, Rubiks rubiks) throws Exception{
-       	createStartCube(arguments);
+       	try{
+    	createStartCube(arguments);
        	this.rubiks = rubiks;
     	cache = new CubeCache(startCube.getSize());
 		masterReceivePort = rubiks.myIbis.createReceivePort(Rubiks.portWorkerToMaster, "receive port");
 		masterReceivePort.enableConnections();
 		masterComputation();
+       	} catch(Exception exc){
+       		System.out.println(exc);
+       	}
     }
     
     
