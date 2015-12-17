@@ -28,7 +28,7 @@ public class Worker {
 				WriteMessage w = workerSendPort.newMessage();
 				w.writeString(Rubiks.READY_FOR_NEW_JOBS);
 				w.finish();
-
+				System.out.println("cazzo");
 				// receiving the new job
 				ReadMessage r = workerReceivePort.receive();
 				try {
