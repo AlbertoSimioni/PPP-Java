@@ -31,14 +31,14 @@ public class Worker {
 				try{
 					Object o = r.readObject();
 					if (o instanceof Cube) {
-						//System.out.println("cazzo");
+						System.out.println("cazzo");
 						r.finish();
 						Cube cube = (Cube) o;
 						solutionsFinded += Rubiks.solutions(cube, cache);
 					} else {
 						String message = r.readString();
 						r.finish();
-						//System.out.println("cazzo1.5");
+						System.out.println("cazzo1.5");
 						if (message.equals(Rubiks.PAUSE_WORKER_COMPUTATION)) {
 							sendResultToMaster(solutionsFinded);
 							solutionsFinded = 0;
