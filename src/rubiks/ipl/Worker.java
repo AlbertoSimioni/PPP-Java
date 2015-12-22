@@ -43,6 +43,7 @@ public class Worker {
 						
 						solutionsFinded = 0;
 						ReadMessage rm = workerReceivePort.receive(10000); // message to continue or to stop
+						System.out.println("PORCA MADONNA");
 						String msg = rm.readString();
 						rm.finish();
 						if(msg.equals(Rubiks.FINALIZE_MESSAGE)){
