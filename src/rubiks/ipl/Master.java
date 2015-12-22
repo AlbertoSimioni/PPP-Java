@@ -191,7 +191,7 @@ public class Master {
     }
     
     // waits a message from a worker and then send him the message
-    private void sendMessageToAllWorkers (String message) throws Exception{
+    private void sendMessageToAllWorkers (String message) throws Exception{ //AGGIORNARE I FINISH dopo invio
     	System.out.println("Starting sending messages to workers");
     	for(IbisIdentifier ibisNode : rubiks.ibisNodes){
     		if(!ibisNode.equals(rubiks.myIbis.identifier())){
