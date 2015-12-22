@@ -195,27 +195,28 @@ public class Master {
 																			// dopo
 																			// invio
 		System.out.println("Starting sending messages to workers");
-		ArrayList<ReadMessage> msgs = new ArrayList<ReadMessage>();
+		ArrayList<WriteMessage> msgs = new ArrayList<WriteMessage>();
 		for (IbisIdentifier ibisNode : rubiks.ibisNodes) { // receiving from all
 															// workers
 			if (!ibisNode.equals(rubiks.myIbis.identifier())) {
 				ReadMessage r = masterReceivePort.receive();
-				msgs.add(r);
+				String s = r.readString();
+				IbisIdentifier currentWorker = r.origin().ibisIdentifier();
+				r.finish();
+				if (s.equals(Rubiks.READY_FOR_NEW_JOBS)) {
+					SendPort port = getSendPort(currentWorker);
+					WriteMessage w = port.newMessage();
+					w.writeString(message);
+					msgs.add(w);
+					//w.finish();
+					System.out.println("message sent to worker");
+				} else {
+					System.out.println("Unknown message from client");
+				}
 			}
 		}
-		for (ReadMessage r : msgs) {
-			String s = r.readString();
-			IbisIdentifier currentWorker = r.origin().ibisIdentifier();
-			r.finish();
-			if (s.equals(Rubiks.READY_FOR_NEW_JOBS)) {
-				SendPort port = getSendPort(currentWorker);
-				WriteMessage w = port.newMessage();
-				w.writeString(message);
-				w.finish();
-				System.out.println("message sent to worker");
-			} else {
-				System.out.println("Unknown message from client");
-			}
+		for (WriteMessage w : msgs) {
+			w.finish();
 		}
 		System.out.println("all messages sent");
 	}
