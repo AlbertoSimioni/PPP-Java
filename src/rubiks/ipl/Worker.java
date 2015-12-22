@@ -40,8 +40,9 @@ public class Worker {
 					String message = (String) o;
 					if (message.equals(Rubiks.PAUSE_WORKER_COMPUTATION)) {
 						sendResultToMaster(solutionsFinded);
+						
 						solutionsFinded = 0;
-						ReadMessage rm = workerReceivePort.receive(10000);
+						ReadMessage rm = workerReceivePort.receive(10000); // message to continue or to stop
 						String msg = rm.readString();
 						rm.finish();
 						if(msg.equals(Rubiks.FINALIZE_MESSAGE)){
