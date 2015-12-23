@@ -125,7 +125,7 @@ public class Rubiks {
     private void initialize() throws Exception {
     	myIbis = IbisFactory.createIbis(ibisCapabilities, null,portMasterToWorker,portWorkerToMaster);
         // sleep for a second
-        Thread.sleep(500);
+        Thread.sleep(1000);
         
         ibisNodes  = myIbis.registry().joinedIbises();
         
