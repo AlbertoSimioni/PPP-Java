@@ -273,6 +273,39 @@ public class Master implements MessageUpcall {
 		}
 	}
 
+	
+	
+	public class UpcallThread implements Runnable {
+			Rubiks rubiks = null;
+		   UpcallThread(Rubiks rubiks){
+			   this.rubiks = rubiks;
+		   }
+	       public void run() {
+	    	   try {
+				receiveJobRequestsPort = rubiks.myIbis.createReceivePort(
+							Rubiks.portWorkerToMasterJobs, "jobs port");
+			
+				receiveJobRequestsPort.enableConnections();
+
+				receiveJobRequestsPort.enableMessageUpcalls();
+				synchronized (this) {
+					while (!finished) {
+						try {
+							wait();
+						} catch (Exception e) {
+							// ignored
+						}
+					}
+				}
+				receiveJobRequestsPort.close();
+	    	   } catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+	       }
+
+	    }
+	
 	public Master(String[] arguments, Rubiks rubiks) throws Exception {
 		try {
 			createStartCube(arguments);
@@ -281,27 +314,17 @@ public class Master implements MessageUpcall {
 			receiveControlPort = rubiks.myIbis.createReceivePort(
 					Rubiks.portWorkerToMasterControl, "control port");
 			receiveControlPort.enableConnections();
-			receiveJobRequestsPort = rubiks.myIbis.createReceivePort(
-					Rubiks.portWorkerToMasterJobs, "jobs port");
-			receiveJobRequestsPort.enableConnections();
-
-			receiveJobRequestsPort.enableMessageUpcalls();
+			
+			(new Thread(new UpcallThread(rubiks))).start(); 
+			
 
 			// Close receive port.
-			receiveJobRequestsPort.close();
+
 			long start = System.currentTimeMillis();
 			masterComputation();
 			long end = System.currentTimeMillis();
 
-			synchronized (this) {
-				while (!finished) {
-					try {
-						wait();
-					} catch (Exception e) {
-						// ignored
-					}
-				}
-			}
+			
 			// NOTE: this is printed to standard error! The rest of the output
 			// is
 			// constant for each set of parameters. Printing this to standard
