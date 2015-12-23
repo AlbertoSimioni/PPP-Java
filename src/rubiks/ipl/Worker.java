@@ -30,8 +30,10 @@ public class Worker {
 				Object o = r.readObject();
 				r.finish();
 				try {
-					Cube cube = (Cube) o;
-					solutionsFinded += Rubiks.solutions(cube, cache);
+					Cube[] cubes = (Cube[]) o;
+					for(Cube cube: cubes){
+						solutionsFinded += Rubiks.solutions(cube, cache);
+					}
 				} catch (ClassCastException exc) {
 					String message = (String) o;
 					if (message.equals(Rubiks.PAUSE_WORKER_COMPUTATION)) {

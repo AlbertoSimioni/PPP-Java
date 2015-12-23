@@ -3,6 +3,7 @@ package rubiks.ipl;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 
 import ibis.ipl.IbisIdentifier;
@@ -26,6 +27,10 @@ public class Master {
 
 	private Rubiks rubiks;
 
+	private LinkedList<Cube> cubesQueue = new LinkedList<Cube>();
+
+	private static final int maxCubesToSend = 15;
+
 	private SendPort getSendPort(IbisIdentifier receiver) throws IOException {
 		// System.out.println("GETTING "+ receiver.name());
 		SendPort port = masterSendPorts.get(receiver);
@@ -43,22 +48,33 @@ public class Master {
 		Cube[] children = cube.generateChildren(cache); // ****
 		for (Cube child : children) {
 			if (child.getTwists() >= 3) {
-				ReadMessage r = masterReceivePort.receive();
-				String s = r.readString();
-				IbisIdentifier currentWorker = r.origin().ibisIdentifier();
-				r.finish();
-				if (s.equals(Rubiks.READY_FOR_NEW_JOBS)) {
-					SendPort port = getSendPort(currentWorker);
-					WriteMessage w = port.newMessage();
-					w.writeObject(child);
-					w.finish();
-
-				}
+				cubesQueue.add(child);
+				sendJobs();
 			} else
 				generateJobsForCurrentBound(child, cache); // recursive call
-			cache.put(child);
 		}
 		// System.out.println("MADDONNA GESUITA");
+	}
+
+	private void sendJobs() throws IOException {
+		ReadMessage r = masterReceivePort.poll();
+		if (r != null) {
+			String s = r.readString();
+			IbisIdentifier currentWorker = r.origin().ibisIdentifier();
+			r.finish();
+			int cubesNumber = Math.min(maxCubesToSend, cubesQueue.size());
+			Cube[] cubesToSend = new Cube[cubesNumber];
+			for (int i = 0; !cubesQueue.isEmpty() && i < maxCubesToSend; i++) {
+				cubesToSend[i] = cubesQueue.pollFirst();
+			}
+			SendPort port = getSendPort(currentWorker);
+			WriteMessage w = port.newMessage();
+			w.writeObject(cubesToSend);
+			w.finish();
+			for (Cube c : cubesToSend) {
+				cache.put(c);
+			}
+		}
 	}
 
 	private void createSendPorts() throws Exception {
@@ -85,6 +101,9 @@ public class Master {
 				result = Rubiks.solutions(startCube, cache);
 			} else { // send work to workers
 				generateJobsForCurrentBound(startCube, cache);
+				while (!cubesQueue.isEmpty()) {
+					sendJobs();
+				}
 				sendMessageToAllWorkers(Rubiks.PAUSE_WORKER_COMPUTATION);
 				result = collectResultsFromWorkers();
 				// ora dovrei checkare se sono state trovate soluzioni
@@ -187,9 +206,11 @@ public class Master {
 	}
 
 	/**
-	 *  Waits a message from all the workers, after receiving from them it replies with the message
-	 *  given in input
-	 * @param message The message to be delivered
+	 * Waits a message from all the workers, after receiving from them it
+	 * replies with the message given in input
+	 * 
+	 * @param message
+	 *            The message to be delivered
 	 */
 	private void sendMessageToAllWorkers(String message) throws Exception {
 		ArrayList<WriteMessage> msgs = new ArrayList<WriteMessage>();
