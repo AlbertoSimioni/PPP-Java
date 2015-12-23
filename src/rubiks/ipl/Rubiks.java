@@ -25,7 +25,7 @@ public class Rubiks {
             PortType.RECEIVE_EXPLICIT,PortType.SERIALIZATION_DATA, 
             PortType.CONNECTION_MANY_TO_ONE);
 
-    static PortType portWorkerToMasterJobs = new PortType(
+    static PortType portWorkerToMasterJobs = new PortType(PortType.RECEIVE_EXPLICIT, 
     		PortType.RECEIVE_AUTO_UPCALLS,PortType.SERIALIZATION_DATA,  
             PortType.CONNECTION_MANY_TO_ONE);
     
