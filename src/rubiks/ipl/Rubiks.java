@@ -135,8 +135,11 @@ public class Rubiks {
     
     private void run(String[] arguments) throws Exception { 
     	int size = 3; //retrieving the size of the cube that is needed by the worker nodes
-    	if ( arguments.length > 0 && arguments[0].equalsIgnoreCase("--size")) {
-            size = Integer.parseInt(arguments[0]);
+    	for (int i = 0; i < arguments.length; i++) {
+			if (arguments[i].equalsIgnoreCase("--size")) {
+				i++;
+				size = Integer.parseInt(arguments[i]);
+			}
     	}
     	initialize();
     	
