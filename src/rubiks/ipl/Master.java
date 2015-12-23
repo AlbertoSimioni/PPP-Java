@@ -1,7 +1,6 @@
 package rubiks.ipl;
 
 import java.io.IOException;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -77,6 +76,7 @@ public class Master {
 		int bound = 0;
 		int result = 0;
 		createSendPorts();
+		System.out.print("Bound now:");
 		while (result == 0) {
 			bound++;
 			startCube.setBound(bound);
@@ -227,7 +227,16 @@ public class Master {
 			masterReceivePort = rubiks.myIbis.createReceivePort(
 					Rubiks.portWorkerToMaster, "receive port");
 			masterReceivePort.enableConnections();
+			long start = System.currentTimeMillis();
 			masterComputation();
+	        long end = System.currentTimeMillis();
+
+	        // NOTE: this is printed to standard error! The rest of the output is
+	        // constant for each set of parameters. Printing this to standard error
+	        // makes the output of standard out comparable with "diff"
+	        System.err.println("Solving cube took " + (end - start)
+	                + " milliseconds");
+	        
 		} catch (Exception exc) {
 			System.out.println(exc);
 		}
