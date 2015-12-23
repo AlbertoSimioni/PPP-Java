@@ -8,6 +8,7 @@ import java.util.Map;
 
 import ibis.ipl.IbisIdentifier;
 import ibis.ipl.MessageUpcall;
+import ibis.ipl.PortType;
 import ibis.ipl.ReadMessage;
 import ibis.ipl.ReceivePort;
 import ibis.ipl.SendPort;
@@ -18,7 +19,9 @@ public class Master implements MessageUpcall {
 	private Map<IbisIdentifier, SendPort> masterSendPorts = new HashMap<IbisIdentifier, SendPort>();
 
 	private ReceivePort receiveControlPort = null;
-
+    PortType portWorkerToMasterJobs = new PortType(PortType.RECEIVE_EXPLICIT, 
+    		PortType.RECEIVE_AUTO_UPCALLS,PortType.SERIALIZATION_DATA,  
+            PortType.CONNECTION_MANY_TO_ONE);
 	//private ReceivePort receiveJobRequestsPort = null;
 
 	/**
@@ -312,7 +315,7 @@ public class Master implements MessageUpcall {
 			this.rubiks = rubiks;
 			cache = new CubeCache(startCube.getSize());
 			ReceivePort receiveJobRequestsPort = rubiks.myIbis.createReceivePort(
-					Rubiks.portWorkerToMasterJobs, "jobs port");
+					portWorkerToMasterJobs, "jobs port");
 	
 			receiveJobRequestsPort.enableConnections();
 
