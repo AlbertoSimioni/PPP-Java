@@ -3,19 +3,23 @@ package rubiks.ipl;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 
 import ibis.ipl.IbisIdentifier;
+import ibis.ipl.MessageUpcall;
 import ibis.ipl.ReadMessage;
 import ibis.ipl.ReceivePort;
 import ibis.ipl.SendPort;
 import ibis.ipl.WriteMessage;
 
-public class Master {
+public class Master implements MessageUpcall {
 
 	private Map<IbisIdentifier, SendPort> masterSendPorts = new HashMap<IbisIdentifier, SendPort>();
 
-	private ReceivePort masterReceivePort = null;
+	private ReceivePort receiveControlPort = null;
+
+	private ReceivePort receiveJobRequestsPort = null;
 
 	/**
 	 * Starting cube
@@ -26,10 +30,72 @@ public class Master {
 
 	private Rubiks rubiks;
 
+	boolean finished = true;
+
+	int jobsPerWorker = 10;
+
+	private static int NUMBER_OF_LOCAL_TWISTS = 3;
+
+	Object roundLock = new Object();
+
+	boolean roundEnded = false;
+
+	/**
+	 * Queue of the cube jobs that will be sent to the workers
+	 */
+	private LinkedList<Cube> cubesQueue = new LinkedList<Cube>();
+
+	private ArrayList<Cube> cubesToSend = new ArrayList<Cube>();
+
 	private SendPort getSendPort(IbisIdentifier receiver) throws IOException {
 		// System.out.println("GETTING "+ receiver.name());
 		SendPort port = masterSendPorts.get(receiver);
 		return port;
+	}
+
+	/**
+	 * Function called by Ibis to give us a newly arrived message.
+	 * 
+	 * @param message
+	 *            the message
+	 * @throws IOException
+	 *             when the message cannot be read
+	 */
+	public void upcall(ReadMessage message) throws IOException {
+		String s = message.readString();
+		IbisIdentifier currentWorker = message.origin().ibisIdentifier();
+
+		synchronized (roundLock) {
+			if (roundEnded) // no jobs to be sended
+				return;
+		}
+		try {
+			synchronized (cubesQueue) {
+				while (cubesQueue.size() <= jobsPerWorker) {
+					cubesQueue.wait();
+				}
+				for (int i = 0; i < jobsPerWorker; i++) {
+					cubesToSend.add(cubesQueue.poll());
+				}
+
+			}
+			SendPort port = getSendPort(currentWorker);
+			WriteMessage w = port.newMessage();
+			w.writeObject(cubesToSend);
+			w.finish();
+			for (Cube c : cubesToSend) {
+				cache.put(c);
+			}
+			cubesToSend.clear();
+		} catch (InterruptedException exc) {
+			System.out.print("Error in master upcall");
+			System.exit(0);
+		}
+	}
+
+	synchronized void setFinished() {
+		finished = true;
+		notifyAll();
 	}
 
 	private void generateJobsForCurrentBound(Cube cube, CubeCache cache)
@@ -42,23 +108,22 @@ public class Master {
 		// every possible way. Gets new objects from the cache
 		Cube[] children = cube.generateChildren(cache); // ****
 		for (Cube child : children) {
-			if (child.getTwists() >= 3) {
-				ReadMessage r = masterReceivePort.receive();
-				String s = r.readString();
-				IbisIdentifier currentWorker = r.origin().ibisIdentifier();
-				r.finish();
-				if (s.equals(Rubiks.READY_FOR_NEW_JOBS)) {
-					SendPort port = getSendPort(currentWorker);
-					WriteMessage w = port.newMessage();
-					w.writeObject(child);
-					w.finish();
-
+			if (child.getTwists() >= NUMBER_OF_LOCAL_TWISTS) {
+				/*
+				 * ReadMessage r = masterReceivePort.receive(); String s =
+				 * r.readString(); IbisIdentifier currentWorker =
+				 * r.origin().ibisIdentifier(); r.finish();
+				 */
+				synchronized (cubesQueue) {
+					cubesQueue.add(child);
+					if (cubesQueue.size() == jobsPerWorker)
+						cubesQueue.notify();
 				}
-			} else
+			} else {
 				generateJobsForCurrentBound(child, cache); // recursive call
-			cache.put(child);
+			}
+
 		}
-		// System.out.println("MADDONNA GESUITA");
 	}
 
 	private void createSendPorts() throws Exception {
@@ -81,12 +146,23 @@ public class Master {
 			bound++;
 			startCube.setBound(bound);
 			System.out.print(" " + bound);
-			if (bound <= 3) { // local computation
+			if (bound <= NUMBER_OF_LOCAL_TWISTS) { // local computation
 				result = Rubiks.solutions(startCube, cache);
 			} else { // send work to workers
 				generateJobsForCurrentBound(startCube, cache);
+				synchronized (roundLock) {
+					roundEnded = true;
+				}
 				sendMessageToAllWorkers(Rubiks.PAUSE_WORKER_COMPUTATION);
 				result = collectResultsFromWorkers();
+				String msg = Rubiks.CONTINUE_COMPUTATION;
+				if (result > 0) {
+					msg = Rubiks.FINALIZE_MESSAGE;
+				}
+				sendMessageToAllWorkers(msg);
+				synchronized (roundLock) {
+					roundEnded = false;
+				}
 				// ora dovrei checkare se sono state trovate soluzioni
 			}
 		}
@@ -99,7 +175,7 @@ public class Master {
 		// System.out.println("starting to collect results from workers");
 		int solutionsFinded = 0;
 		for (int i = 0; i < rubiks.ibisNodes.length - 1; i++) {
-			ReadMessage r = masterReceivePort.receive();
+			ReadMessage r = receiveControlPort.receive();
 			int solutions = Integer.parseInt(r.readString());
 			// System.out.println("solutions: " + solutions);
 			r.finish();
@@ -107,25 +183,11 @@ public class Master {
 				System.out.println("WEIRD SOLUTIONS");
 			}
 			solutionsFinded += solutions;
-
-		}
-		// System.out.println("Finished round, Solutions finded: "+
-		// solutionsFinded);
-		String msg = Rubiks.CONTINUE_COMPUTATION;
-		if (solutionsFinded > 0) {
-			msg = Rubiks.FINALIZE_MESSAGE;
-		}
-
-		for (Map.Entry<IbisIdentifier, SendPort> entry : masterSendPorts
-				.entrySet()) {
-			SendPort port = entry.getValue();
-			WriteMessage w = port.newMessage();
-			w.writeString(msg);
-			w.finish();
 		}
 		return solutionsFinded;
 	}
 
+	
 	/**
 	 * Creates the initial cube
 	 * 
@@ -187,25 +249,19 @@ public class Master {
 	}
 
 	/**
-	 *  Waits a message from all the workers, after receiving from them it replies with the message
-	 *  given in input
-	 * @param message The message to be delivered
+	 * Waits a message from all the workers, after receiving from them it
+	 * replies with the message given in input
+	 * 
+	 * @param message
+	 *            The message to be delivered
 	 */
 	private void sendMessageToAllWorkers(String message) throws Exception {
 		ArrayList<WriteMessage> msgs = new ArrayList<WriteMessage>();
-		for (int i = 0; i < rubiks.ibisNodes.length - 1; i++) {
-			ReadMessage r = masterReceivePort.receive();
-			String s = r.readString();
-			IbisIdentifier currentWorker = r.origin().ibisIdentifier();
-			r.finish();
-			if (s.equals(Rubiks.READY_FOR_NEW_JOBS)) {
-				SendPort port = getSendPort(currentWorker);
-				WriteMessage w = port.newMessage();
-				w.writeString(message);
-				msgs.add(w);
-			} else {
-				System.out.println("Unknown message from client");
-			}
+		for (Map.Entry<IbisIdentifier, SendPort> entry : masterSendPorts.entrySet()) {
+			SendPort port = entry.getValue();
+			WriteMessage w = port.newMessage();
+			w.writeString(message);
+			msgs.add(w);
 		}
 		for (WriteMessage w : msgs) {
 			w.finish();
@@ -217,13 +273,30 @@ public class Master {
 			createStartCube(arguments);
 			this.rubiks = rubiks;
 			cache = new CubeCache(startCube.getSize());
-			masterReceivePort = rubiks.myIbis.createReceivePort(
-					Rubiks.portWorkerToMaster, "receive port");
-			masterReceivePort.enableConnections();
+			receiveControlPort = rubiks.myIbis.createReceivePort(
+					Rubiks.portWorkerToMasterControl, "control port");
+			receiveControlPort.enableConnections();
+			receiveJobRequestsPort = rubiks.myIbis.createReceivePort(
+					Rubiks.portWorkerToMasterJobs, "jobs port");
+			receiveJobRequestsPort.enableConnections();
+
+			receiveJobRequestsPort.enableMessageUpcalls();
+
+			// Close receive port.
+			receiveJobRequestsPort.close();
 			long start = System.currentTimeMillis();
 			masterComputation();
 			long end = System.currentTimeMillis();
 
+			synchronized (this) {
+				while (!finished) {
+					try {
+						wait();
+					} catch (Exception e) {
+						// ignored
+					}
+				}
+			}
 			// NOTE: this is printed to standard error! The rest of the output
 			// is
 			// constant for each set of parameters. Printing this to standard

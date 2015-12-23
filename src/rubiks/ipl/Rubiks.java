@@ -10,20 +10,25 @@ import ibis.ipl.PortType;
 /**
  * Solver for rubik's cube puzzle.
  * 
- * @author Niels Drost, Timo van Kessel
+ * @author Alberto Simioni
  * 
  */
 public class Rubiks {
 	
 
-    static PortType portMasterToWorker = new PortType( //reliable communications and election
-            PortType.SERIALIZATION_OBJECT,PortType.RECEIVE_EXPLICIT,  //one_to_one, string can be sent
+    static PortType portMasterToWorker = new PortType( 
+            PortType.RECEIVE_EXPLICIT,  
+            PortType.SERIALIZATION_OBJECT,
             PortType.CONNECTION_ONE_TO_ONE);
     
-    static PortType portWorkerToMaster = new PortType( //reliable communications and election
-            PortType.SERIALIZATION_OBJECT, PortType.RECEIVE_EXPLICIT,  //one_to_one, string can be sent
+    static PortType portWorkerToMasterControl = new PortType( 
+            PortType.RECEIVE_EXPLICIT, 
             PortType.CONNECTION_MANY_TO_ONE);
 
+    static PortType portWorkerToMasterJobs = new PortType(
+    		PortType.RECEIVE_AUTO_UPCALLS,  
+            PortType.CONNECTION_MANY_TO_ONE);
+    
     static IbisCapabilities ibisCapabilities = new IbisCapabilities(
             IbisCapabilities.ELECTIONS_STRICT,
             IbisCapabilities.MEMBERSHIP_TOTALLY_ORDERED,
@@ -123,7 +128,7 @@ public class Rubiks {
      * @throws Exception if something goes wrong due to connection problem
      */
     private void initialize() throws Exception {
-    	myIbis = IbisFactory.createIbis(ibisCapabilities, null,portMasterToWorker,portWorkerToMaster);
+    	myIbis = IbisFactory.createIbis(ibisCapabilities, null,portMasterToWorker,portWorkerToMasterControl,portWorkerToMasterJobs);
         // sleep for a second
         Thread.sleep(1000);
         
