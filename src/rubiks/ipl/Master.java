@@ -311,11 +311,17 @@ public class Master implements MessageUpcall {
 			createStartCube(arguments);
 			this.rubiks = rubiks;
 			cache = new CubeCache(startCube.getSize());
+			receiveJobRequestsPort = rubiks.myIbis.createReceivePort(
+					Rubiks.portWorkerToMasterJobs, "jobs port");
+	
+			receiveJobRequestsPort.enableConnections();
+
+			receiveJobRequestsPort.enableMessageUpcalls();
 			receiveControlPort = rubiks.myIbis.createReceivePort(
 					Rubiks.portWorkerToMasterControl, "control port");
 			receiveControlPort.enableConnections();
 			
-			(new Thread(new UpcallThread(rubiks))).start(); 
+			//(new Thread(new UpcallThread(rubiks))).start(); 
 			
 
 			// Close receive port.
