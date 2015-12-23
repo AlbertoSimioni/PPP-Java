@@ -62,6 +62,7 @@ public class Master implements MessageUpcall {
 	 *             when the message cannot be read
 	 */
 	public void upcall(ReadMessage message) throws IOException {
+		System.out.println("UPCALL");
 		String s = message.readString();
 		IbisIdentifier currentWorker = message.origin().ibisIdentifier();
 
@@ -71,18 +72,21 @@ public class Master implements MessageUpcall {
 		}
 		try {
 			synchronized (cubesQueue) {
+				System.out.println("PRE_WAIT");
 				while (cubesQueue.size() <= jobsPerWorker) {
 					cubesQueue.wait();
 				}
+				System.out.println("GETTING_CUBES");
 				for (int i = 0; i < jobsPerWorker; i++) {
 					cubesToSend.add(cubesQueue.poll());
 				}
-
 			}
+			
 			SendPort port = getSendPort(currentWorker);
 			WriteMessage w = port.newMessage();
 			w.writeObject(cubesToSend);
 			w.finish();
+			System.out.println("CUBES_SENT");
 			for (Cube c : cubesToSend) {
 				cache.put(c);
 			}

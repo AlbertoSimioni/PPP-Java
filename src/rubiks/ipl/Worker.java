@@ -30,6 +30,7 @@ public class Worker {
 		sendPortControl.connect(rubiks.master, "control port");
 		ArrayList<Cube> cubes = null;
 		while (!end) {
+			System.out.println("READY_JOBS");
 			// asking for a new job
 			if(!zeroCubesReceived){
 				WriteMessage w = sendPortJobs.newMessage();
@@ -43,6 +44,7 @@ public class Worker {
 			try {
 				cubes = (ArrayList<Cube>) o;
 				if (cubes.isEmpty()) {
+					System.out.println("EMPTY_CUBE");
 					zeroCubesReceived = true;
 					if (roundEnded == true) {
 						end = endRoundComputations(solutionsFinded);
@@ -50,13 +52,16 @@ public class Worker {
 						zeroCubesReceived = false;
 					}
 				} else {
+					System.out.println("CALCULATING_CUBES");
 					for (Cube c : cubes) {
 						solutionsFinded += Rubiks.solutions(c, cache);
 					}
 				}
 			} catch (ClassCastException exc) {
 				String message = (String) o;
+				
 				if (message.equals(Rubiks.PAUSE_WORKER_COMPUTATION)) {
+					System.out.println("PAUSE_WORKER");
 					roundEnded = true;
 					if (zeroCubesReceived == true) {
 						end = endRoundComputations(solutionsFinded);
