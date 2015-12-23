@@ -30,6 +30,8 @@ public class Master {
 	private LinkedList<Cube> cubesQueue = new LinkedList<Cube>();
 
 	private static final int maxCubesToSend = 15;
+	
+	private LinkedList<Integer> sizes = new LinkedList<Integer>();
 
 	private SendPort getSendPort(IbisIdentifier receiver) throws IOException {
 		// System.out.println("GETTING "+ receiver.name());
@@ -63,6 +65,7 @@ public class Master {
 			IbisIdentifier currentWorker = r.origin().ibisIdentifier();
 			r.finish();
 			int cubesNumber = Math.min(maxCubesToSend, cubesQueue.size());
+			sizes.add(cubesNumber);
 			Cube[] cubesToSend = new Cube[cubesNumber];
 			for (int i = 0; !cubesQueue.isEmpty() && i < maxCubesToSend; i++) {
 				cubesToSend[i] = cubesQueue.pollFirst();
@@ -112,6 +115,9 @@ public class Master {
 		System.out.println();
 		System.out.println("Solving cube possible in " + result + " ways of "
 				+ bound + " steps");
+		for(int i: sizes){
+			System.out.print(" " + i);
+		}
 	}
 
 	private int collectResultsFromWorkers() throws Exception {
