@@ -35,7 +35,7 @@ public class Master {
 
 	private void generateJobsForCurrentBound(Cube cube, CubeCache cache)
 			throws IOException {
-		System.out.println("Generate");
+		//System.out.println("Generate");
 		if (cube.getTwists() >= cube.getBound()) {
 			return;
 		}
@@ -90,7 +90,6 @@ public class Master {
 				// ora dovrei checkare se sono state trovate soluzioni
 			}
 		}
-		sendMessageToAllWorkers(Rubiks.FINALIZE_MESSAGE);
 		System.out.println();
 		System.out.println("Solving cube possible in " + result + " ways of "
 				+ bound + " steps");
@@ -194,7 +193,7 @@ public class Master {
 																			// FINISH
 																			// dopo
 																			// invio
-		System.out.println("Starting sending messages to workers");
+		//System.out.println("Starting sending messages to workers");
 		ArrayList<WriteMessage> msgs = new ArrayList<WriteMessage>();
 		for (IbisIdentifier ibisNode : rubiks.ibisNodes) { // receiving from all
 															// workers
@@ -209,7 +208,7 @@ public class Master {
 					w.writeString(message);
 					msgs.add(w);
 					//w.finish();
-					System.out.println("message sent to worker");
+					//System.out.println("message sent to worker");
 				} else {
 					System.out.println("Unknown message from client");
 				}
@@ -218,7 +217,7 @@ public class Master {
 		for (WriteMessage w : msgs) {
 			w.finish();
 		}
-		System.out.println("all messages sent");
+		//System.out.println("all messages sent");
 	}
 
 	public Master(String[] arguments, Rubiks rubiks) throws Exception {

@@ -43,11 +43,11 @@ public class Worker {
 						
 						solutionsFinded = 0;
 						ReadMessage rm = workerReceivePort.receive(10000); // message to continue or to stop
-						System.out.println("PORCA MADONNA");
 						String msg = rm.readString();
 						rm.finish();
 						if(msg.equals(Rubiks.FINALIZE_MESSAGE)){
 							end = true;
+							System.out.println("FINALIZE RECEIVED");
 						}
 						else if(!msg.equals(Rubiks.CONTINUE_COMPUTATION)){
 							System.out.println("WEIRD MESSAGE FROM MASTER1");
@@ -58,6 +58,7 @@ public class Worker {
 				}
 
 			}
+			System.out.println("ENDING");
 
 		} catch (Exception exc) {
 			System.out.println(exc.getMessage());
