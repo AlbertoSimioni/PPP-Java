@@ -19,7 +19,7 @@ public class Master implements MessageUpcall {
 
 	private ReceivePort receiveControlPort = null;
 
-	private ReceivePort receiveJobRequestsPort = null;
+	//private ReceivePort receiveJobRequestsPort = null;
 
 	/**
 	 * Starting cube
@@ -275,7 +275,7 @@ public class Master implements MessageUpcall {
 
 	
 	
-	public class UpcallThread implements Runnable {
+	/*public class UpcallThread implements Runnable {
 			Rubiks rubiks = null;
 		   UpcallThread(Rubiks rubiks){
 			   this.rubiks = rubiks;
@@ -304,14 +304,14 @@ public class Master implements MessageUpcall {
 				}
 	       }
 
-	    }
+	    }*/
 	
 	public Master(String[] arguments, Rubiks rubiks) throws Exception {
 		try {
 			createStartCube(arguments);
 			this.rubiks = rubiks;
 			cache = new CubeCache(startCube.getSize());
-			receiveJobRequestsPort = rubiks.myIbis.createReceivePort(
+			ReceivePort receiveJobRequestsPort = rubiks.myIbis.createReceivePort(
 					Rubiks.portWorkerToMasterJobs, "jobs port");
 	
 			receiveJobRequestsPort.enableConnections();
