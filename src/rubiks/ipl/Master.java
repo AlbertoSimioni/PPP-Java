@@ -8,21 +8,21 @@ import java.util.Map;
 
 import ibis.ipl.IbisIdentifier;
 import ibis.ipl.MessageUpcall;
-import ibis.ipl.PortType;
 import ibis.ipl.ReadMessage;
 import ibis.ipl.ReceivePort;
+import ibis.ipl.ReceivePortConnectUpcall;
 import ibis.ipl.SendPort;
+import ibis.ipl.SendPortIdentifier;
 import ibis.ipl.WriteMessage;
 
-public class Master implements MessageUpcall {
+public class Master {
 
 	private Map<IbisIdentifier, SendPort> masterSendPorts = new HashMap<IbisIdentifier, SendPort>();
 
 	private ReceivePort receiveControlPort = null;
-    PortType portWorkerToMasterJobs = new PortType(PortType.RECEIVE_EXPLICIT, 
-    		PortType.RECEIVE_AUTO_UPCALLS,PortType.SERIALIZATION_DATA,  
-            PortType.CONNECTION_MANY_TO_ONE);
-	//private ReceivePort receiveJobRequestsPort = null;
+
+	private ReceivePort receiveJobRequestsPort = null;
+	// private ReceivePort receiveJobRequestsPort = null;
 
 	/**
 	 * Starting cube
@@ -56,6 +56,54 @@ public class Master implements MessageUpcall {
 		return port;
 	}
 
+	public class JobsRequestsThread implements Runnable {
+
+		@Override
+		public void run() {
+			boolean end = false;
+			try{
+			while (!end) {
+				ReadMessage message = receiveJobRequestsPort.receive();
+				System.out.print("RECEIVED JOB REQUEST");
+				String s = message.readString();
+				IbisIdentifier currentWorker = message.origin()
+						.ibisIdentifier();
+
+				synchronized (roundLock) {
+					if (roundEnded) // no jobs to be sended
+						return;
+				}
+				try {
+					synchronized (cubesQueue) {
+						System.out.println("PRE_WAIT");
+						while (cubesQueue.size() <= jobsPerWorker) {
+							cubesQueue.wait();
+						}
+						System.out.println("GETTING_CUBES");
+						for (int i = 0; i < jobsPerWorker; i++) {
+							cubesToSend.add(cubesQueue.poll());
+						}
+					}
+
+					SendPort port = getSendPort(currentWorker);
+					WriteMessage w = port.newMessage();
+					w.writeObject(cubesToSend);
+					w.finish();
+					System.out.println("CUBES_SENT");
+					for (Cube c : cubesToSend) {
+						cache.put(c);
+					}
+					cubesToSend.clear();
+				} catch (InterruptedException exc) {
+					System.out.print("Error in master upcall");
+					System.exit(0);
+				}
+			}
+		}catch(IOException exc){ System.err.println(exc.getMessage());}
+			}
+
+	}
+
 	/**
 	 * Function called by Ibis to give us a newly arrived message.
 	 * 
@@ -65,39 +113,7 @@ public class Master implements MessageUpcall {
 	 *             when the message cannot be read
 	 */
 	public void upcall(ReadMessage message) throws IOException {
-		System.out.println("UPCALL");
-		String s = message.readString();
-		IbisIdentifier currentWorker = message.origin().ibisIdentifier();
 
-		synchronized (roundLock) {
-			if (roundEnded) // no jobs to be sended
-				return;
-		}
-		try {
-			synchronized (cubesQueue) {
-				System.out.println("PRE_WAIT");
-				while (cubesQueue.size() <= jobsPerWorker) {
-					cubesQueue.wait();
-				}
-				System.out.println("GETTING_CUBES");
-				for (int i = 0; i < jobsPerWorker; i++) {
-					cubesToSend.add(cubesQueue.poll());
-				}
-			}
-			
-			SendPort port = getSendPort(currentWorker);
-			WriteMessage w = port.newMessage();
-			w.writeObject(cubesToSend);
-			w.finish();
-			System.out.println("CUBES_SENT");
-			for (Cube c : cubesToSend) {
-				cache.put(c);
-			}
-			cubesToSend.clear();
-		} catch (InterruptedException exc) {
-			System.out.print("Error in master upcall");
-			System.exit(0);
-		}
 	}
 
 	synchronized void setFinished() {
@@ -195,7 +211,6 @@ public class Master implements MessageUpcall {
 		return solutionsFinded;
 	}
 
-	
 	/**
 	 * Creates the initial cube
 	 * 
@@ -265,7 +280,8 @@ public class Master implements MessageUpcall {
 	 */
 	private void sendMessageToAllWorkers(String message) throws Exception {
 		ArrayList<WriteMessage> msgs = new ArrayList<WriteMessage>();
-		for (Map.Entry<IbisIdentifier, SendPort> entry : masterSendPorts.entrySet()) {
+		for (Map.Entry<IbisIdentifier, SendPort> entry : masterSendPorts
+				.entrySet()) {
 			SendPort port = entry.getValue();
 			WriteMessage w = port.newMessage();
 			w.writeString(message);
@@ -276,56 +292,38 @@ public class Master implements MessageUpcall {
 		}
 	}
 
-	
-	
-	/*public class UpcallThread implements Runnable {
-			Rubiks rubiks = null;
-		   UpcallThread(Rubiks rubiks){
-			   this.rubiks = rubiks;
-		   }
-	       public void run() {
-	    	   try {
-				receiveJobRequestsPort = rubiks.myIbis.createReceivePort(
-							Rubiks.portWorkerToMasterJobs, "jobs port");
-			
-				receiveJobRequestsPort.enableConnections();
+	/*
+	 * public class UpcallThread implements Runnable { Rubiks rubiks = null;
+	 * UpcallThread(Rubiks rubiks){ this.rubiks = rubiks; } public void run() {
+	 * try { receiveJobRequestsPort = rubiks.myIbis.createReceivePort(
+	 * Rubiks.portWorkerToMasterJobs, "jobs port");
+	 * 
+	 * receiveJobRequestsPort.enableConnections();
+	 * 
+	 * receiveJobRequestsPort.enableMessageUpcalls(); synchronized (this) {
+	 * while (!finished) { try { wait(); } catch (Exception e) { // ignored } }
+	 * } receiveJobRequestsPort.close(); } catch (IOException e1) { // TODO
+	 * Auto-generated catch block e1.printStackTrace(); } }
+	 * 
+	 * }
+	 */
 
-				receiveJobRequestsPort.enableMessageUpcalls();
-				synchronized (this) {
-					while (!finished) {
-						try {
-							wait();
-						} catch (Exception e) {
-							// ignored
-						}
-					}
-				}
-				receiveJobRequestsPort.close();
-	    	   } catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-	       }
-
-	    }*/
-	
 	public Master(String[] arguments, Rubiks rubiks) throws Exception {
 		try {
 			createStartCube(arguments);
 			this.rubiks = rubiks;
 			cache = new CubeCache(startCube.getSize());
-			ReceivePort receiveJobRequestsPort = rubiks.myIbis.createReceivePort(
-					portWorkerToMasterJobs, "jobs port");
-	
-			receiveJobRequestsPort.enableConnections();
+			receiveJobRequestsPort = rubiks.myIbis
+					.createReceivePort(Rubiks.portWorkerToMasterJobs,
+							"jobs port");
 
-			receiveJobRequestsPort.enableMessageUpcalls();
+			receiveJobRequestsPort.enableConnections();
+			new Thread(new JobsRequestsThread()).run();
 			receiveControlPort = rubiks.myIbis.createReceivePort(
 					Rubiks.portWorkerToMasterControl, "control port");
 			receiveControlPort.enableConnections();
-			
-			//(new Thread(new UpcallThread(rubiks))).start(); 
-			
+
+			// (new Thread(new UpcallThread(rubiks))).start();
 
 			// Close receive port.
 
@@ -333,7 +331,6 @@ public class Master implements MessageUpcall {
 			masterComputation();
 			long end = System.currentTimeMillis();
 
-			
 			// NOTE: this is printed to standard error! The rest of the output
 			// is
 			// constant for each set of parameters. Printing this to standard
