@@ -104,7 +104,7 @@ public class Master implements MessageUpcall {
 
 	private void generateJobsForCurrentBound(Cube cube, CubeCache cache)
 			throws IOException {
-		// System.out.println("Generate");
+		System.out.println("Generate");
 		if (cube.getTwists() >= cube.getBound()) {
 			return;
 		}
@@ -153,6 +153,7 @@ public class Master implements MessageUpcall {
 			if (bound <= NUMBER_OF_LOCAL_TWISTS) { // local computation
 				result = Rubiks.solutions(startCube, cache);
 			} else { // send work to workers
+				System.out.println("ELSE");
 				generateJobsForCurrentBound(startCube, cache);
 				synchronized (roundLock) {
 					roundEnded = true;
