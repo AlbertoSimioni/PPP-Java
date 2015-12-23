@@ -151,7 +151,7 @@ public class Rubiks {
     	myIbis.end();
     }
     
-    
+   
     /**
      * Main function, it starts creates a new object of the class that uses ibis to resolve
      * the Rubik's cube
