@@ -26,8 +26,11 @@ public class Worker {
 	public void workerComputation() throws Exception {
 		boolean end = false;
 		int solutionsFinded = 0;
+		System.out.println("P1");
 		sendPortJobs.connect(rubiks.master, "jobs port");
+		System.out.println("P2");
 		sendPortControl.connect(rubiks.master, "control port");
+		System.out.println("P3");
 		ArrayList<Cube> cubes = null;
 		while (!end) {
 			System.out.println("READY_JOBS");
@@ -108,5 +111,6 @@ public class Worker {
 		workerReceivePort = rubiks.myIbis.createReceivePort(
 				Rubiks.portMasterToWorker, "receive port");
 		workerReceivePort.enableConnections();
+		System.out.println("Constructor");
 	}
 }
