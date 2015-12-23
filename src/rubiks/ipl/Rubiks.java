@@ -16,11 +16,11 @@ import ibis.ipl.PortType;
 public class Rubiks {
 	
 
-    static PortType portMasterToWorker = new PortType(PortType.COMMUNICATION_RELIABLE, //reliable communications and election
-            PortType.SERIALIZATION_OBJECT,PortType.RECEIVE_EXPLICIT, PortType.RECEIVE_TIMEOUT,  //one_to_one, string can be sent
+    static PortType portMasterToWorker = new PortType( //reliable communications and election
+            PortType.SERIALIZATION_OBJECT,PortType.RECEIVE_EXPLICIT,  //one_to_one, string can be sent
             PortType.CONNECTION_ONE_TO_ONE);
     
-    static PortType portWorkerToMaster = new PortType(PortType.COMMUNICATION_RELIABLE, //reliable communications and election
+    static PortType portWorkerToMaster = new PortType( //reliable communications and election
             PortType.SERIALIZATION_OBJECT, PortType.RECEIVE_EXPLICIT,  //one_to_one, string can be sent
             PortType.CONNECTION_MANY_TO_ONE);
 
@@ -128,20 +128,13 @@ public class Rubiks {
         Thread.sleep(500);
         
         ibisNodes  = myIbis.registry().joinedIbises();
-        /*
-        System.out.println("NUMBER OF JOINED NODES:" + ibisNodes.length);
-        for(IbisIdentifier ibisids : ibisNodes){
-        	System.out.println(ibisids.name()); 
-        }*/
         
-        // Elect a server
-        master = myIbis.registry().elect("Master");
-
-       // System.out.println("Server is " + server);    
+        // Elect a master
+        master = myIbis.registry().elect("Master"); 
     }
     
     private void run(String[] arguments) throws Exception { 
-    	int size = 3;
+    	int size = 3; //retrieving the size of the cube that is needed by the worker nodes
     	if ( arguments.length > 0 && arguments[0].equalsIgnoreCase("--size")) {
             size = Integer.parseInt(arguments[0]);
     	}
@@ -152,18 +145,6 @@ public class Rubiks {
         } else {
             new Worker(size,this).workerComputation();
         }
-    	
-    	/**
-        // solve
-        long start = System.currentTimeMillis();
-        //4)START TO SOLVE
-        solve(startCube);
-        long end = System.currentTimeMillis();**/
-
-        // NOTE: this is printed to standard error! The rest of the output is
-        // constant for each set of parameters. Printing this to standard error
-        // makes the output of standard out comparable with "diff"
-        //System.err.println("Solving cube took " + (end - start) + " milliseconds")
     	myIbis.end();
     }
     

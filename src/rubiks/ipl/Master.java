@@ -34,7 +34,7 @@ public class Master {
 
 	private void generateJobsForCurrentBound(Cube cube, CubeCache cache)
 			throws IOException {
-		//System.out.println("Generate");
+		// System.out.println("Generate");
 		if (cube.getTwists() >= cube.getBound()) {
 			return;
 		}
@@ -96,12 +96,12 @@ public class Master {
 	}
 
 	private int collectResultsFromWorkers() throws Exception {
-		//System.out.println("starting to collect results from workers");
+		// System.out.println("starting to collect results from workers");
 		int solutionsFinded = 0;
-		for (int i = 0; i < rubiks.ibisNodes.length -1; i++) {
+		for (int i = 0; i < rubiks.ibisNodes.length - 1; i++) {
 			ReadMessage r = masterReceivePort.receive();
 			int solutions = Integer.parseInt(r.readString());
-			//System.out.println("solutions: " + solutions);
+			// System.out.println("solutions: " + solutions);
 			r.finish();
 			if (solutions < 0 | solutions > 30000) {
 				System.out.println("WEIRD SOLUTIONS");
@@ -109,20 +109,20 @@ public class Master {
 			solutionsFinded += solutions;
 
 		}
-		//System.out.println("Finished round, Solutions finded: "+ solutionsFinded);
+		// System.out.println("Finished round, Solutions finded: "+
+		// solutionsFinded);
 		String msg = Rubiks.CONTINUE_COMPUTATION;
 		if (solutionsFinded > 0) {
 			msg = Rubiks.FINALIZE_MESSAGE;
 		}
-		for (IbisIdentifier ibisNode : rubiks.ibisNodes) {
-			if (!ibisNode.equals(rubiks.myIbis.identifier())) {
-				SendPort port = getSendPort(ibisNode);
-				WriteMessage w = port.newMessage();
-				w.writeString(msg);
-				w.finish();
-			}
-		}
 
+		for (Map.Entry<IbisIdentifier, SendPort> entry : masterSendPorts
+				.entrySet()) {
+			SendPort port = entry.getValue();
+			WriteMessage w = port.newMessage();
+			w.writeString(msg);
+			w.finish();
+		}
 		return solutionsFinded;
 	}
 
@@ -186,37 +186,30 @@ public class Master {
 
 	}
 
-	// waits a message from a worker and then send him the message
-	private void sendMessageToAllWorkers(String message) throws Exception { // AGGIORNARE
-																			// I
-																			// FINISH
-																			// dopo
-																			// invio
-		//System.out.println("Starting sending messages to workers");
+	/**
+	 *  Waits a message from all the workers, after receiving from them it replies with the message
+	 *  given in input
+	 * @param message The message to be delivered
+	 */
+	private void sendMessageToAllWorkers(String message) throws Exception {
 		ArrayList<WriteMessage> msgs = new ArrayList<WriteMessage>();
-		for (IbisIdentifier ibisNode : rubiks.ibisNodes) { // receiving from all
-															// workers
-			if (!ibisNode.equals(rubiks.myIbis.identifier())) {
-				ReadMessage r = masterReceivePort.receive();
-				String s = r.readString();
-				IbisIdentifier currentWorker = r.origin().ibisIdentifier();
-				r.finish();
-				if (s.equals(Rubiks.READY_FOR_NEW_JOBS)) {
-					SendPort port = getSendPort(currentWorker);
-					WriteMessage w = port.newMessage();
-					w.writeString(message);
-					msgs.add(w);
-					//w.finish();
-					//System.out.println("message sent to worker");
-				} else {
-					System.out.println("Unknown message from client");
-				}
+		for (int i = 0; i < rubiks.ibisNodes.length - 1; i++) {
+			ReadMessage r = masterReceivePort.receive();
+			String s = r.readString();
+			IbisIdentifier currentWorker = r.origin().ibisIdentifier();
+			r.finish();
+			if (s.equals(Rubiks.READY_FOR_NEW_JOBS)) {
+				SendPort port = getSendPort(currentWorker);
+				WriteMessage w = port.newMessage();
+				w.writeString(message);
+				msgs.add(w);
+			} else {
+				System.out.println("Unknown message from client");
 			}
 		}
 		for (WriteMessage w : msgs) {
 			w.finish();
 		}
-		//System.out.println("all messages sent");
 	}
 
 	public Master(String[] arguments, Rubiks rubiks) throws Exception {
@@ -229,14 +222,16 @@ public class Master {
 			masterReceivePort.enableConnections();
 			long start = System.currentTimeMillis();
 			masterComputation();
-	        long end = System.currentTimeMillis();
+			long end = System.currentTimeMillis();
 
-	        // NOTE: this is printed to standard error! The rest of the output is
-	        // constant for each set of parameters. Printing this to standard error
-	        // makes the output of standard out comparable with "diff"
-	        System.err.println("Solving cube took " + (end - start)
-	                + " milliseconds");
-	        
+			// NOTE: this is printed to standard error! The rest of the output
+			// is
+			// constant for each set of parameters. Printing this to standard
+			// error
+			// makes the output of standard out comparable with "diff"
+			System.err.println("Solving cube took " + (end - start)
+					+ " milliseconds");
+
 		} catch (Exception exc) {
 			System.out.println(exc);
 		}
