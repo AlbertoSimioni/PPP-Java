@@ -96,12 +96,12 @@ public class Master {
 	}
 
 	private int collectResultsFromWorkers() throws Exception {
-		System.out.println("starting to collect results from workers");
+		//System.out.println("starting to collect results from workers");
 		int solutionsFinded = 0;
 		for (int i = 0; i < rubiks.ibisNodes.length -1; i++) {
 			ReadMessage r = masterReceivePort.receive();
 			int solutions = Integer.parseInt(r.readString());
-			System.out.println("solutions: " + solutions);
+			//System.out.println("solutions: " + solutions);
 			r.finish();
 			if (solutions < 0 | solutions > 30000) {
 				System.out.println("WEIRD SOLUTIONS");
@@ -109,8 +109,7 @@ public class Master {
 			solutionsFinded += solutions;
 
 		}
-		System.out.println("Finished round, Solutions finded: "
-				+ solutionsFinded);
+		//System.out.println("Finished round, Solutions finded: "+ solutionsFinded);
 		String msg = Rubiks.CONTINUE_COMPUTATION;
 		if (solutionsFinded > 0) {
 			msg = Rubiks.FINALIZE_MESSAGE;
