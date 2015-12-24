@@ -61,8 +61,9 @@ public class Master {
 	}
 
 	private void sendJobs(boolean sendWithoutCheckingSize) throws IOException {
+		if((sendWithoutCheckingSize || (cubesQueue.size() >= maxCubesToSend))){
 		ReadMessage r = masterReceivePort.poll();
-		if (r != null && (sendWithoutCheckingSize || cubesQueue.size() >= maxCubesToSend)) {
+		if (r != null) {
 			String s = r.readString();
 			IbisIdentifier currentWorker = r.origin().ibisIdentifier();
 			r.finish();
@@ -79,6 +80,7 @@ public class Master {
 			for (Cube c : cubesToSend) {
 				cache.put(c);
 			}
+		}
 		}
 	}
 
