@@ -29,7 +29,7 @@ public class Master {
 
 	private LinkedList<Cube> cubesQueue = new LinkedList<Cube>();
 
-	private static final int minCubesToSend = 1;
+	private static final int minCubesToSend = 3;
 	
 	private static final int maxCubesToSend = 10;
 	
