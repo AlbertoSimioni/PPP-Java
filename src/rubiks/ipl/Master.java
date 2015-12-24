@@ -31,7 +31,7 @@ public class Master {
 
 	private static final int maxCubesToSend = 10;
 	
-	private static final int localTwistsBound = 2;
+	private static final int localTwistsBound = 4;
 	
 	//private LinkedList<Integer> sizes = new LinkedList<Integer>();
 
