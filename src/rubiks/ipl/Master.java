@@ -29,7 +29,9 @@ public class Master {
 
 	private LinkedList<Cube> cubesQueue = new LinkedList<Cube>();
 
-	private static final int maxCubesToSend = 9;
+	private static final int minCubesToSend = 5;
+	
+	private static final int maxCubesToSend = 20;
 	
 	private static final int localTwistsBound = 3;
 	
@@ -61,7 +63,7 @@ public class Master {
 	}
 
 	private void sendJobs(boolean sendWithoutCheckingSize) throws IOException {
-		if((sendWithoutCheckingSize || (cubesQueue.size() >= maxCubesToSend))){
+		if((sendWithoutCheckingSize || (cubesQueue.size() >= minCubesToSend))){
 		ReadMessage r = masterReceivePort.poll();
 		if (r != null) {
 			String s = r.readString();
