@@ -31,7 +31,7 @@ public class Master {
 
 	private static final int minCubesToSend = 5;
 	
-	private static final int maxCubesToSend = 15;
+	private static final int maxCubesToSend = 10;
 	
 	private static final int localTwistsBound = 3;
 	
