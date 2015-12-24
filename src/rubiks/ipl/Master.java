@@ -115,9 +115,7 @@ public class Master {
 		System.out.println();
 		System.out.println("Solving cube possible in " + result + " ways of "
 				+ bound + " steps");
-		for(int i: sizes){
-			System.out.print(" " + i);
-		}
+
 	}
 
 	private int collectResultsFromWorkers() throws Exception {
@@ -258,6 +256,9 @@ public class Master {
 			// makes the output of standard out comparable with "diff"
 			System.err.println("Solving cube took " + (end - start)
 					+ " milliseconds");
+			for(int i: sizes){
+				System.out.print(" " + i);
+			}
 
 		} catch (Exception exc) {
 			System.out.println(exc);
