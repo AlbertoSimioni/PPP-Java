@@ -31,6 +31,8 @@ public class Master {
 
 	private static final int maxCubesToSend = 15;
 	
+	private static final int localTwistsBound = 3;
+	
 	private LinkedList<Integer> sizes = new LinkedList<Integer>();
 
 	private SendPort getSendPort(IbisIdentifier receiver) throws IOException {
@@ -49,18 +51,18 @@ public class Master {
 		// every possible way. Gets new objects from the cache
 		Cube[] children = cube.generateChildren(cache); // ****
 		for (Cube child : children) {
-			if (child.getTwists() >= 3) {
+			if (child.getTwists() >= localTwistsBound) {
 				cubesQueue.add(child);
-				sendJobs();
+				sendJobs(false);
 			} else
 				generateJobsForCurrentBound(child, cache); // recursive call
 		}
 		// System.out.println("MADDONNA GESUITA");
 	}
 
-	private void sendJobs() throws IOException {
+	private void sendJobs(boolean sendWithoutCheckingSize) throws IOException {
 		ReadMessage r = masterReceivePort.poll();
-		if (r != null) {
+		if (r != null && (sendWithoutCheckingSize || cubesQueue.size() >= maxCubesToSend)) {
 			String s = r.readString();
 			IbisIdentifier currentWorker = r.origin().ibisIdentifier();
 			r.finish();
@@ -100,12 +102,12 @@ public class Master {
 			bound++;
 			startCube.setBound(bound);
 			System.out.print(" " + bound);
-			if (bound <= 3) { // local computation
+			if (bound <= localTwistsBound) { // local computation
 				result = Rubiks.solutions(startCube, cache);
 			} else { // send work to workers
 				generateJobsForCurrentBound(startCube, cache);
 				while (!cubesQueue.isEmpty()) {
-					sendJobs();
+					sendJobs(true);
 				}
 				sendMessageToAllWorkers(Rubiks.PAUSE_WORKER_COMPUTATION);
 				result = collectResultsFromWorkers();
