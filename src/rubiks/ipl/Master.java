@@ -33,7 +33,7 @@ public class Master {
 	
 	private static final int localTwistsBound = 3;
 	
-	private LinkedList<Integer> sizes = new LinkedList<Integer>();
+	//private LinkedList<Integer> sizes = new LinkedList<Integer>();
 
 	private SendPort getSendPort(IbisIdentifier receiver) throws IOException {
 		// System.out.println("GETTING "+ receiver.name());
@@ -68,7 +68,7 @@ public class Master {
 			IbisIdentifier currentWorker = r.origin().ibisIdentifier();
 			r.finish();
 			int cubesNumber = Math.min(maxCubesToSend, cubesQueue.size());
-			sizes.add(cubesNumber);
+			//sizes.add(cubesNumber);
 			Cube[] cubesToSend = new Cube[cubesNumber];
 			for (int i = 0; !cubesQueue.isEmpty() && i < maxCubesToSend; i++) {
 				cubesToSend[i] = cubesQueue.pollFirst();
@@ -260,9 +260,9 @@ public class Master {
 			// makes the output of standard out comparable with "diff"
 			System.err.println("Solving cube took " + (end - start)
 					+ " milliseconds");
-			for(int i: sizes){
+			/*for(int i: sizes){
 				System.out.print(" " + i);
-			}
+			}*/
 
 		} catch (Exception exc) {
 			System.out.println(exc);
