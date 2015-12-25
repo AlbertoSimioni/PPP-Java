@@ -169,7 +169,7 @@ public class Master {
 	private void masterComputation() throws Exception {
 		int bound = 0;
 		int result = 0;
-
+		createSendPorts();
 		System.out.print("Bound now:");
 		while (result == 0) {
 			bound++;
@@ -334,7 +334,7 @@ public class Master {
 			masterReceivePort = rubiks.myIbis.createReceivePort(
 					Rubiks.portWorkerToMaster, "receive port");
 			masterReceivePort.enableConnections();
-			createSendPorts();
+
 			
 			//Computation
 			long start = System.currentTimeMillis();
