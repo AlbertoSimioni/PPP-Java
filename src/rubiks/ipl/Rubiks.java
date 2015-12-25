@@ -29,6 +29,7 @@ public class Rubiks {
 			IbisCapabilities.MEMBERSHIP_TOTALLY_ORDERED,
 			IbisCapabilities.TERMINATION);
 
+	
 	/**
 	 * Identifier of the server node
 	 */
