@@ -305,14 +305,11 @@ public class Master {
 			String s = r.readString();
 			IbisIdentifier currentWorker = r.origin().ibisIdentifier();
 			r.finish();
-			if (s.equals(Rubiks.READY_FOR_NEW_JOBS)) {
 				SendPort port = getSendPort(currentWorker);
 				WriteMessage w = port.newMessage();
 				w.writeString(message);
 				msgs.add(w);
-			} else {
-				System.out.println("Unknown message from client");
-			}
+			
 		}
 		//Until all the messages are sent to the workers, it doesn't let the Workers to continue
 		//Otherwise this function could receive a message two times from the same Worker
