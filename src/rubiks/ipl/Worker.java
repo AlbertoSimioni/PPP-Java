@@ -60,10 +60,32 @@ public class Worker {
 				}
 				
 			} catch (ClassCastException exc) {
+				String message = (String) o;
+				if (message.equals(Rubiks.PAUSE_WORKER_COMPUTATION)) {
+					sendResultToMaster(solutionsFound);
+
+					solutionsFound = 0;
+					ReadMessage rm = workerReceivePort.receive(); // message
+																	// to
+																	// continue
+																	// or to
+																	// stop
+					String msg = rm.readString();
+					rm.finish();
+					if (msg.equals(Rubiks.FINALIZE_MESSAGE)) {
+						endLoop = true;
+					} else if (!msg.equals(Rubiks.CONTINUE_COMPUTATION)) {
+						System.out.println("WEIRD MESSAGE FROM MASTER1");
+					}
+				} else {
+					System.out.println("WEIRD MESSAGE FROM MASTER2");
+				}
+				/**
 				//Pause message received from the Master
 				//If the function returns true the computation will terminate
 				endLoop = handleControlMessages((String) o, solutionsFound);
 				solutionsFound = 0;
+				**/
 			}
 		}
 	}
@@ -126,6 +148,6 @@ public class Worker {
 		workerReceivePort.enableConnections();
 
 		
-		workerComputation();
+		
 	}
 }
