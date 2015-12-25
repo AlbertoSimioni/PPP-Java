@@ -197,7 +197,6 @@ public class Master {
 				if (result > 0) {
 					msg = Rubiks.FINALIZE_MESSAGE;
 				}
-
 				for (Map.Entry<IbisIdentifier, SendPort> entry : masterSendPorts
 						.entrySet()) {
 					SendPort port = entry.getValue();
@@ -205,6 +204,7 @@ public class Master {
 					w.writeString(msg);
 					w.finish();
 				}
+				
 			}
 		}
 		System.out.println();
@@ -219,15 +219,15 @@ public class Master {
 	 * @return The number of solutions finded from all the workers
 	 */
 	private int collectResultsFromWorkers() throws Exception {
-		int solutionsFinded = 0;
+		int solutionsFound = 0;
 		for (int i = 0; i < rubiks.ibisNodes.length - 1; i++) {
 			ReadMessage r = masterReceivePort.receive();
 			int solutions = Integer.parseInt(r.readString());
 			r.finish();
-			solutionsFinded += solutions;
+			solutionsFound += solutions;
 
 		}
-		return solutionsFinded;
+		return solutionsFound;
 	}
 
 	/**
