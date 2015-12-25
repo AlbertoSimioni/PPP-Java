@@ -61,7 +61,7 @@ public class Master {
 	/**
 	 * Maximum number of cubes that can be sent in a message
 	 */
-	private static final int maxCubesToSend = 10;
+	private static final int maxCubesToSend = 7;
 
 	/**
 	 * Number of local twists per cube that will be performed by the Master
@@ -119,6 +119,7 @@ public class Master {
 		if ((sendWithoutCheckingSize || (cubesQueue.size() >= minCubesToSend))) {
 			ReadMessage r = masterReceivePort.poll();
 			if (r != null) { // false = no worker ready
+				String s = r.readString();
 				IbisIdentifier currentWorker = r.origin().ibisIdentifier();
 				r.finish();
 				int cubesNumber = Math.min(maxCubesToSend, cubesQueue.size());
@@ -189,7 +190,7 @@ public class Master {
 
 				// Collecting the results
 				result = collectResultsFromWorkers();
-
+				/*
 				// If no solutions are found the Master advises the Workers to
 				// continue
 				// otherwise it advises the Workers to stop
@@ -204,7 +205,7 @@ public class Master {
 					WriteMessage w = port.newMessage();
 					w.writeString(msg);
 					w.finish();
-				}
+				}*/
 			}
 		}
 		System.out.println();
@@ -219,15 +220,27 @@ public class Master {
 	 * @return The number of solutions finded from all the workers
 	 */
 	private int collectResultsFromWorkers() throws Exception {
-		int solutionsFinded = 0;
+		int solutionsFound = 0;
 		for (int i = 0; i < rubiks.ibisNodes.length - 1; i++) {
 			ReadMessage r = masterReceivePort.receive();
 			int solutions = Integer.parseInt(r.readString());
 			r.finish();
-			solutionsFinded += solutions;
+			solutionsFound += solutions;
 
 		}
-		return solutionsFinded;
+		String msg = Rubiks.CONTINUE_COMPUTATION;
+		if (solutionsFound > 0) {
+			msg = Rubiks.FINALIZE_MESSAGE;
+		}
+
+		for (Map.Entry<IbisIdentifier, SendPort> entry : masterSendPorts
+				.entrySet()) {
+			SendPort port = entry.getValue();
+			WriteMessage w = port.newMessage();
+			w.writeString(msg);
+			w.finish();
+		}
+		return solutionsFound;
 	}
 
 	/**
