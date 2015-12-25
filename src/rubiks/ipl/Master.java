@@ -302,7 +302,7 @@ public class Master {
 		ArrayList<WriteMessage> msgs = new ArrayList<WriteMessage>();
 		for (int i = 0; i < rubiks.ibisNodes.length - 1; i++) {
 			ReadMessage r = masterReceivePort.receive();
-			String s = r.readString();
+			//String s = r.readString();
 			IbisIdentifier currentWorker = r.origin().ibisIdentifier();
 			r.finish();
 				SendPort port = getSendPort(currentWorker);
