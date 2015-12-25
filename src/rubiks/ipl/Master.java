@@ -190,7 +190,7 @@ public class Master {
 
 				// Collecting the results
 				result = collectResultsFromWorkers();
-				/*
+
 				// If no solutions are found the Master advises the Workers to
 				// continue
 				// otherwise it advises the Workers to stop
@@ -205,7 +205,7 @@ public class Master {
 					WriteMessage w = port.newMessage();
 					w.writeString(msg);
 					w.finish();
-				}*/
+				}
 			}
 		}
 		System.out.println();
@@ -228,18 +228,7 @@ public class Master {
 			solutionsFound += solutions;
 
 		}
-		String msg = Rubiks.CONTINUE_COMPUTATION;
-		if (solutionsFound > 0) {
-			msg = Rubiks.FINALIZE_MESSAGE;
-		}
-
-		for (Map.Entry<IbisIdentifier, SendPort> entry : masterSendPorts
-				.entrySet()) {
-			SendPort port = entry.getValue();
-			WriteMessage w = port.newMessage();
-			w.writeString(msg);
-			w.finish();
-		}
+		
 		return solutionsFound;
 	}
 
@@ -313,13 +302,17 @@ public class Master {
 		ArrayList<WriteMessage> msgs = new ArrayList<WriteMessage>();
 		for (int i = 0; i < rubiks.ibisNodes.length - 1; i++) {
 			ReadMessage r = masterReceivePort.receive();
+			String s = r.readString();
 			IbisIdentifier currentWorker = r.origin().ibisIdentifier();
 			r.finish();
-			SendPort port = getSendPort(currentWorker);
-			WriteMessage w = port.newMessage();
-			w.writeString(message);
-			msgs.add(w);
-
+			if (s.equals(Rubiks.READY_FOR_NEW_JOBS)) {
+				SendPort port = getSendPort(currentWorker);
+				WriteMessage w = port.newMessage();
+				w.writeString(message);
+				msgs.add(w);
+			} else {
+				System.out.println("Unknown message from client");
+			}
 		}
 		//Until all the messages are sent to the workers, it doesn't let the Workers to continue
 		//Otherwise this function could receive a message two times from the same Worker
