@@ -16,13 +16,11 @@ import ibis.ipl.PortType;
 public class Rubiks {
 
 	static PortType portMasterToWorker = new PortType(
-			//PortType.COMMUNICATION_RELIABLE, 
-			PortType.SERIALIZATION_OBJECT,
+			PortType.COMMUNICATION_RELIABLE, PortType.SERIALIZATION_OBJECT,
 			PortType.RECEIVE_EXPLICIT, PortType.CONNECTION_ONE_TO_ONE);
 
 	static PortType portWorkerToMaster = new PortType(
-			//PortType.COMMUNICATION_RELIABLE, 
-			PortType.SERIALIZATION_OBJECT,
+			PortType.COMMUNICATION_RELIABLE, PortType.SERIALIZATION_OBJECT,
 			PortType.RECEIVE_EXPLICIT, PortType.RECEIVE_POLL,
 			PortType.CONNECTION_MANY_TO_ONE);
 

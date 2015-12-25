@@ -189,7 +189,7 @@ public class Master {
 
 				// Collecting the results
 				result = collectResultsFromWorkers();
-
+				/*
 				// If no solutions are found the Master advises the Workers to
 				// continue
 				// otherwise it advises the Workers to stop
@@ -203,7 +203,7 @@ public class Master {
 					WriteMessage w = port.newMessage();
 					w.writeString(msg);
 					w.finish();
-				}
+				}*/
 				
 			}
 		}
@@ -225,8 +225,21 @@ public class Master {
 			int solutions = Integer.parseInt(r.readString());
 			r.finish();
 			solutionsFound += solutions;
-
 		}
+		// System.out.println("Finished round, Solutions finded: "+
+				// solutionsFinded);
+				String msg = Rubiks.CONTINUE_COMPUTATION;
+				if (solutionsFound > 0) {
+					msg = Rubiks.FINALIZE_MESSAGE;
+				}
+
+				for (Map.Entry<IbisIdentifier, SendPort> entry : masterSendPorts
+						.entrySet()) {
+					SendPort port = entry.getValue();
+					WriteMessage w = port.newMessage();
+					w.writeString(msg);
+					w.finish();
+				}
 		return solutionsFound;
 	}
 
