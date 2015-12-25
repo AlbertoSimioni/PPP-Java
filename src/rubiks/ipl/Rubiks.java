@@ -38,25 +38,25 @@ public class Rubiks {
 	 * Message sent from a Worker to the Master to advise him that it's ready
 	 * for computing new jobs
 	 */
-	static  String READY_FOR_NEW_JOBS = "r";
+	static final String READY_FOR_NEW_JOBS = "r";
 
 	/**
 	 * Message sent from the Master to a Worker to advise him that the
 	 * computation isn't ended
 	 */
-	static  String CONTINUE_COMPUTATION = "c";
+	static final String CONTINUE_COMPUTATION = "c";
 
 	/**
 	 * Message sent from the Master to a Worker to advise him to send the
 	 * solutions finded for the current bound
 	 */
-	static  String PAUSE_WORKER_COMPUTATION = "p";
+	static final String PAUSE_WORKER_COMPUTATION = "p";
 
 	/**
 	 * Message sent from the Master to a Worker to advise him that the
 	 * computation is ended
 	 */
-	static  String FINALIZE_MESSAGE = "f";
+	static final String FINALIZE_MESSAGE = "f";
 
 	public Ibis myIbis = null;
 
