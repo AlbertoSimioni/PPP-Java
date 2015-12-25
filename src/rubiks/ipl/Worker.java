@@ -37,7 +37,7 @@ public class Worker {
 	public void workerComputation() throws Exception {
 		boolean endLoop = false;
 		int solutionsFound = 0;
-		workerSendPort.connect(rubiks.master, "receive port");
+
 		while (!endLoop) {
 
 			// asking for a new job
@@ -124,6 +124,8 @@ public class Worker {
 		workerReceivePort = rubiks.myIbis.createReceivePort(
 				Rubiks.portMasterToWorker, "receive port");
 		workerReceivePort.enableConnections();
+		workerSendPort.connect(rubiks.master, "receive port");
+		workerComputation();
 
 		
 		

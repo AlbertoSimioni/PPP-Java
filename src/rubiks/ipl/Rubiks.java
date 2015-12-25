@@ -173,7 +173,7 @@ public class Rubiks {
 		if (master.equals(myIbis.identifier())) {
 			new Master(arguments, this);
 		} else {
-			new Worker(size, this).workerComputation();
+			new Worker(size, this);
 		}
 
 		// The computation is performed inside the constructor, so when this
